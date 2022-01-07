@@ -1,0 +1,6 @@
+- name: "Deploy Gloo Mesh"
+  hosts: localhost
+  vars_files:
+    - vars.yml
+  roles:
+    - role: kameshsampath.gloo.mesh

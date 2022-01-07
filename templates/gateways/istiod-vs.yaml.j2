@@ -1,0 +1,40 @@
+#jinja2: lstrip_blocks: "True"
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: istiod-vs
+  {%if istio_revision %}
+  namespace: istio-gateways
+  {% endif %}
+spec:
+  hosts:
+  {% if istio_revision %}
+  - istiod-{{istio_revision}}.istio-system.svc.cluster.local
+  {% else %}
+  - istiod.istio-system.svc.cluster.local
+  {% endif %}
+  gateways:
+  - istiod-gateway
+  tcp:
+  - match:
+    - port: 15012
+    route:
+    - destination:
+        {% if istio_revision %}
+        host: istiod-{{istio_revision}}.istio-system.svc.cluster.local
+        {% else %}
+        host: istiod.istio-system.svc.cluster.local
+        {% endif %}
+        port:
+          number: 15012
+  - match:
+    - port: 15017
+    route:
+    - destination:
+        {% if istio_revision %}
+        host: istiod-{{istio_revision}}.istio-system.svc.cluster.local
+        {% else %}
+        host: istiod.istio-system.svc.cluster.local
+        {% endif %}
+        port:
+          number: 443

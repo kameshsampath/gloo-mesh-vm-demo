@@ -1,0 +1,14 @@
+#jinja2: lstrip_blocks: "True"
+apiVersion: networking.istio.io/v1alpha3
+kind: WorkloadGroup
+metadata:
+  name: "{{ istio_vm_app }}"
+  namespace: "{{ istio_vm_namespace }}"
+spec:
+  metadata:
+    labels:
+      app: {{ istio_vm_app }}
+      # version: canary
+  template:
+    serviceAccount: "{{ istio_vm_service_account }}"
+    network: "{{ istio_vm_network }}"

@@ -1,0 +1,12 @@
+#jinja2: lstrip_blocks: "True"
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: "{{ istio_vm_namespace }}"
+  labels:
+    {% if istio_revision is defined %}
+    istio.io/rev: {{ istio_revision }}
+    {% else %}
+    istio-injection: enabled
+    {% endif %}
+spec: {}

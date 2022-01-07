@@ -1,0 +1,47 @@
+- name: "Deploy Istio"
+  hosts: localhost
+  vars_files:
+    - vars.yml
+  vars:
+    istiod_templates_dir: "{{ playbook_dir + '/templates/gateways/' }}"
+  roles:
+    - role: kameshsampath.kubernetes_spices.istio
+  tasks:
+    - name: "Create/Update Workload Namespaces"
+      kubernetes.core.k8s:
+        context: "{{ istio_clusters[istio_cluster].k8s_context }}"
+        state: present
+        definition:
+          api_version: v1
+          kind: Namespace
+          metadata:
+            name: "{{ kube_ns_item }}"
+            metadata:
+              labels:
+                istio.io/rev: "{{ istio_revision }}"
+          spec:
+            finalizers:
+              - kubernetes
+      loop:
+        - default
+        - apps
+      loop_control:
+        loop_var: kube_ns_item
+      vars:
+        istio_version: "{{ istio_clusters[istio_cluster].version }}"
+        istio_revision: "{{ istio_clusters[istio_cluster].version | kameshsampath.kubernetes_spices.version_to_revision }}"
+      when: istio_clusters[istio_cluster].install
+
+    - name: "Deploy Cross Network Gateway"
+      kubernetes.core.k8s:
+        context: "{{ istio_clusters[istio_cluster].k8s_context }}"
+        state: present
+        namespace: istio-gateways
+        template:
+          - path: "{{ istiod_templates_dir + 'cross-network-gateway.yaml.j2'}}"
+          - path: "{{ istiod_templates_dir + 'istiod-gateway.yaml.j2'}}"
+          - path: "{{ istiod_templates_dir + 'istiod-vs.yaml.j2'}}"
+      vars:
+        istio_version: "{{ istio_clusters[istio_cluster].version }}"
+        istio_revision: "{{ istio_clusters[istio_cluster].version | kameshsampath.kubernetes_spices.version_to_revision }}"
+      when: istio_clusters[istio_cluster].install

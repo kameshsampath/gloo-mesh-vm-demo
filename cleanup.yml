@@ -1,0 +1,41 @@
+- hosts: localhost
+  gather_facts: no
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: "Delete VMs"
+      ansible.builtin.command:
+         argv:
+           - multipass
+           - delete
+           - "{{ item }}"
+           - --purge
+      loop:
+        - mgmt
+        - cluster1
+        - vm1
+      ignore_errors: true
+      register: delete_vm_result
+    
+    - debug:
+       var: delete_vm_result
+
+    - name: "Cleanup work directories"
+      ansible.builtin.file:
+        state: absent
+        path: "{{ item }}"
+      loop:
+        - "{{ work_dir }}/.kube"
+        - "{{ playbook_dir }}/.kube"
+
+    - name: "Cleanup work files"
+      ansible.builtin.file:
+        state: absent
+        path: "{{ item }}"
+      with_fileglob:
+        - "{{ playbook_dir }}/.kube"
+        - "{{ work_dir }}/*.yaml"
+        - "{{ work_dir }}/*.yml"
+        - "{{ work_dir }}/*.tar.gz"
+        - "{{ work_dir }}/*.password"

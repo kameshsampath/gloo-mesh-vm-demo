@@ -1,0 +1,24 @@
+#jinja2: lstrip_blocks: "True"
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: istiod-gateway
+  {%if istio_revision %}
+  namespace: istio-gateways
+  {% endif %}
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        name: tcp-istiod
+        number: 15012
+        protocol: TCP
+      hosts:
+        - "*"
+    - port:
+        name: tcp-istiodwebhook
+        number: 15017
+        protocol: TCP
+      hosts:
+        - "*"

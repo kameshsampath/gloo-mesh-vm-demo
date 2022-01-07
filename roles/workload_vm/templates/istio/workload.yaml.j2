@@ -1,0 +1,22 @@
+#jinja2: lstrip_blocks: "True"
+apiVersion: discovery.mesh.gloo.solo.io/v1
+kind: Workload
+metadata:
+  name: "{{ istio_vm_app }}-{{ istio_vm_namespace }}-{{ istio_cluster }}"
+  namespace: gloo-mesh
+spec:
+  kubernetes:
+    controller:
+      clusterName: {{ istio_cluster }}
+      name: {{ istio_vm_app }}
+      namespace: {{ istio_vm_namespace }}
+    podLabels:
+      app: {{ istio_vm_app }}
+    serviceAccountName: {{ istio_vm_namespace }}
+  mesh:
+    {% if istio_revision is defined %}
+    name: istiod-{{ istio_revision }}-istio-system-{{ istio_cluster }}
+    {% else %}
+    name: istiod-istio-system-{{ istio_cluster }}
+    {% endif %}
+    namespace: gloo-mesh

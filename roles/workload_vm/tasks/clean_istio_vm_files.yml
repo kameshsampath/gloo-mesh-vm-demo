@@ -1,0 +1,45 @@
+- name: "Restart Istio"
+  become: yes
+  service:
+    name: istio
+    state: stopped
+  ignore_errors: yes
+
+- name: "Remove the root certificate root-cert.pem"
+  become: yes
+  file:
+    path: /etc/certs/root-cert.pem
+    state: absent
+
+- name: "Remove istio-token"
+  become: yes
+  file:
+    path: /var/run/secrets/tokens/istio-token
+    state: absent
+
+- name: "Remove cluster.env"
+  become: yes
+  file:
+    path: /var/lib/istio/envoy/cluster.env
+    state: absent
+
+- name: "Remove the Mesh Config"
+  become: yes
+  file:
+    path: /etc/istio/config/mesh/mesh.yaml
+    state: absent
+
+- name: "Remove istio Required Directories"
+  become: yes
+  file:
+    state: absent
+    path: "{{ item }}"
+  with_items:
+    - /etc/certs
+    - /var/run/secrets/tokens
+    - /etc/istio/proxy
+
+- name: "Remove Istio Work Dir"
+  file:
+    path: "{{ istio_vm_workdir }}"
+    state: absent

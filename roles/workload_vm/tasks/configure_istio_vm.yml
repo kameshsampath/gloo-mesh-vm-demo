@@ -1,0 +1,325 @@
+- name: "Extract Istio Cluster version and revision"
+  set_fact:
+    istio_version: "{{ istio_clusters[istio_cluster].version }}"
+
+- name: 'Using Istio Version'
+  debug:
+   var: istio_version
+
+- name: "Download Istio"
+  get_url:
+    url: "https://github.com/istio/istio/releases/download/{{ istio_version }}/istio-{{ istio_version }}-linux-amd64.tar.gz"
+    checksum: "sha256:https://github.com/istio/istio/releases/download/{{ istio_version }}/istio-{{ istio_version }}-linux-amd64.tar.gz.sha256"
+    dest: "/tmp"
+
+- name: "Extract Istio {{ istio_version }}"
+  unarchive:
+    src: "/tmp/istio-{{ istio_version }}-linux-amd64.tar.gz"
+    dest: "{{ ansible_env.HOME }}"
+    remote_src: yes
+  register: istio_install
+
+- name: "Update .bashrc"
+  ansible.builtin.blockinfile:
+    marker: "# {mark} ANSIBLE MANAGED BLOCK Istio {{ istio_version }}"
+    block: |
+      ISTIO_HOME=~/istio-{{ istio_version }}
+      PATH=$ISTIO_HOME/bin:$PATH
+    dest: "{{ ansible_env.HOME }}/.bashrc"
+  when: istio_install
+
+- name: "Clean existing Istio VM files"
+  include: clean_istio_vm_files.yml
+  when: clean_istio_vm_files
+
+- name: "Lookup Istio Ingress Gateway"
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    namespace: "{{ workload_istio_gateway_ns }}"
+    name: "{{ workload_istio_svc_name }}"
+    context: "{{ gloo_clusters.cluster1.k8s_context }}"
+  register: istio_ingress_gw_result
+
+# - debug:
+#    var: istio_ingress_gw_result
+
+- name: "Get LoadBalancer Address"
+  set_fact:
+    ingress_gw_lb_addr: "{{ istio_ingress_gw_result.resources[0] | community.general.json_query('status.loadBalancer.ingress[*]')}}"
+  when: not use_nodeport
+
+# - debug:
+#     var: ingress_gw_lb_addr
+
+- name: "A record (IPV4 address) lookup for LoadBalancer"
+  set_fact:
+    lb_ips: "{{ lookup('community.general.dig',ingress_gw_lb_addr[0].hostname) | split(',') }}"
+    multi_lb: True
+  when: ingress_gw_lb_addr[0].hostname is defined and ingress_gw_lb_addr | length > 0 and not use_nodeport
+
+- name: "Set LoadBalancer IP"
+  set_fact:
+    lb_ips: "{{ ingress_gw_lb_addr[0].ip }}"
+    one_lb: True
+  when: not use_nodeport and ingress_gw_lb_addr[0].ip is defined and ingress_gw_lb_addr | length > 0
+
+- name: "Istio Cluster Node IP"
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Node
+    name: cluster1
+    context: "cluster1"
+  register: node_ip_result
+  when: use_nodeport 
+
+- name: "Set Istiod NodePort"
+  set_fact:
+    istiod_nodeport: "{{ istio_ingress_gw_result.resources | first | community.general.json_query(istiod_nodeport_query) | first }}"
+  when:  use_nodeport
+
+- name: "Set LoadBalancer IP"
+  set_fact:
+    lb_ips: "{{ node_ip_result.resources | first | json_query('status.addresses[?type==`InternalIP`].address') | first }}"
+    one_lb: True
+  when:  use_nodeport
+
+- name: "Debug Istio Ingress LB IPs"
+  debug:
+    var: lb_ips
+
+- name: "Remove istiod entry from hosts file"
+  become: yes
+  blockinfile:
+    marker: "# {mark} ANSIBLE MANAGED BLOCK ISTIO"
+    path: "/etc/hosts"
+    block: |
+      {%if one_lb %}
+      {{ lb_ips }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local      
+      {% elif multi_lb %}
+      {{ lb_ips[0] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+      {{ lb_ips[1] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+      {% endif %}
+    state: absent
+  when: clean_istio_vm_files 
+  notify:
+  - "Restart Istio"
+
+- name: "Add istiod entry to hosts file"
+  become: yes
+  blockinfile:
+    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    path: "/etc/hosts"
+    block: |
+      {%if one_lb %}
+      {%if istio_revision is defined %}
+      {{ lb_ips }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
+      {% else %}
+      {{ lb_ips }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+      {% endif %}
+      {% elif multi_lb %}
+      {%if istio_revision is defined %}
+      {{ lb_ips[0] }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
+      {{ lb_ips[1] }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
+      {% else %}
+      {{ lb_ips[0] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+      {{ lb_ips[1] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+      {% endif %}
+      {% endif %}
+  notify:
+  - "Restart Istio"
+
+- name: "Create or Update VM Workload Namespace"
+  kubernetes.core.k8s:
+    state: present
+    context: "{{ gloo_clusters.cluster1.k8s_context }}"
+    template:
+      path: 'istio/namespace.yaml.j2'
+
+- name: "Create or Update VM Workload ServiceAccount"
+  kubernetes.core.k8s:
+    state: present
+    context: "{{ gloo_clusters.cluster1.k8s_context }}"
+    template:
+      path: 'istio/sa.yaml.j2'
+    
+- name: "Create or Update VM Workload in Cluster"
+  kubernetes.core.k8s:
+    state: present
+    context: "{{ gloo_clusters.mgmt.k8s_context }}"
+    template:
+      path: 'istio/workload.yaml.j2'
+
+- name: "Create or Update VM Destination in Cluster"
+  kubernetes.core.k8s:
+    state: present
+    context: "{{ gloo_clusters.mgmt.k8s_context }}"
+    template:
+      path: 'istio/destination.yaml.j2'
+
+- name: "Create or Update VM Workload Service in Cluster"
+  kubernetes.core.k8s:
+    state: present
+    context: "{{ gloo_clusters.cluster1.k8s_context }}"
+    template:
+      path: 'istio/service.yaml.j2'
+
+- name: "Create or Update VM Workload Entry in Cluster"
+  kubernetes.core.k8s:
+    state: present
+    context: "{{ gloo_clusters.cluster1.k8s_context }}"
+    template:
+      path: 'istio/workload-entry.yaml.j2'
+
+- name: "Create Istio Work Dir"
+  file:
+    path: "{{ istio_vm_workdir }}"
+    recurse: True
+    state: directory
+
+- name: "Create workload YAML"
+  template:
+    dest: "{{ istio_vm_workdir }}/workload-group.yaml"
+    src: "istio/workload-group.yaml.j2"
+
+- name: "Generate Workload Files"
+  ansible.builtin.command:
+    argv:
+      - "{{ ansible_env.HOME }}/istio-{{ istio_version }}/bin/istioctl"
+      - "--context"
+      - "{{ istio_cluster }}"
+      - x
+      - workload
+      - entry
+      - configure
+      - "--file"
+      - "{{ istio_vm_workdir }}/workload-group.yaml"
+      - "--output"
+      - "{{ istio_vm_workdir }}"
+      - "--clusterID"
+      - "{{ istio_cluster }}"
+      - "--kubeconfig"
+      - "{{ ansible_env.HOME }}/.kube/config"
+      - "--context"
+      - "{{ gloo_clusters.cluster1.k8s_context }}"
+  register: workload_entry_create
+
+- name: "Install Istio Sidecar(Debian)"
+  become: yes
+  ansible.builtin.apt:
+    deb: "https://storage.googleapis.com/istio-release/releases/{{ istio_version }}/deb/istio-sidecar.deb"
+  when: ansible_os_family == "Debian"
+
+- name: "Install Istio Sidecar(RedHat)"
+  become: yes
+  ansible.builtin.dnf:
+    name: "https://storage.googleapis.com/istio-release/releases/{{ istio_version }}/rpm/istio-sidecar.rpm"
+    disable_gpg_check: yes
+  when: ansible_os_family == "RedHat"
+
+- name: "Enable Istio"
+  become: yes
+  service:
+    name: istio
+    enabled: true
+
+- name: "Create Required Directories"
+  become: yes
+  file:
+    state: directory
+    path: "{{ item }}"
+  with_items:
+    - /etc/certs
+    - /var/run/secrets/tokens
+    - /etc/istio/proxy
+
+- name: "Set Istiod Service IP"
+  become: yes
+  lineinfile:
+    backup: yes
+    backrefs: yes
+    path: /etc/istio/envoy/sidecar.env
+    regexp: "^#(\\s*ISTIO_SVC_IP=).*$"
+    line: "ISTIO_SVC_IP={{ istio_svc_ip }}"
+
+- name: "Set Istiod CA_ADDR"
+  become: yes
+  lineinfile:
+    backup: yes
+    backrefs: yes
+    path: /etc/istio/envoy/sidecar.env
+    regexp: ^#(\s*CA_ADDR=).*$
+    line: \g<1>istiod.istio-system.svc:{{ istiod_nodeport }}
+  when: use_nodeport
+
+- name: "Install the root certificate root-cert.pem"
+  become: yes
+  copy:
+    src: "{{ istio_vm_workdir }}/root-cert.pem"
+    dest: /etc/certs/root-cert.pem
+    remote_src: yes
+  notify:
+  - "Restart Istio"
+
+- name: "Install the token istio-token"
+  become: yes
+  copy:
+    src: "{{ istio_vm_workdir }}/istio-token"
+    dest: /var/run/secrets/tokens/istio-token
+    remote_src: yes
+  notify:
+  - "Restart Istio"
+
+- name: "Install cluster.env"
+  become: yes
+  copy:
+    src: "{{ istio_vm_workdir }}/cluster.env"
+    dest: /var/lib/istio/envoy/cluster.env
+    remote_src: yes
+  notify:
+  - "Restart Istio"
+
+- name: "Set Istiod CA_ADDR in mesh config"
+  become: yes
+  lineinfile:
+    backup: yes
+    backrefs: yes
+    path: "{{ istio_vm_workdir }}/mesh.yaml"
+    regexp: ^(\s*discoveryAddress:\s*).*$
+    line: \g<1>istiod.istio-system.svc:{{ istiod_nodeport }}
+  when: use_nodeport
+
+- name: "Install the Mesh Config"
+  become: yes
+  copy:
+    src: "{{ istio_vm_workdir }}/mesh.yaml"
+    dest: /etc/istio/config/mesh
+    remote_src: yes
+  notify:
+  - "Restart Istio"
+
+- name: "Set Right Ownership on file {{ item }}"
+  become: yes
+  file:
+    dest: "{{ item }}"
+    owner: "istio-proxy"
+  with_items:
+    - /etc/certs/root-cert.pem
+  loop_control:
+    label: "{{ item }}"
+
+- name: "Set Right Ownership on {{ item }} directories"
+  become: yes
+  file:
+    dest: "{{ item }}"
+    recurse: yes
+    owner: "istio-proxy"
+  with_items:
+    - /var/lib/istio
+    - /etc/certs
+    - /etc/istio/proxy
+    - /etc/istio/config
+    - /var/run/secrets
+  loop_control:
+    label: "{{ item }}"
+

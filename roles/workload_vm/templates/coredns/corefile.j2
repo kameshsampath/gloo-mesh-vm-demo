@@ -1,0 +1,19 @@
+. {
+  errors
+  log
+  
+  {% if core_dns_use_k8s %}
+
+  rewrite name suffix .svc. .svc.cluster.local answer auto
+
+  kubernetes  cluster.local in-addr.arpa ip6.arpa {
+    endpoint "{{ k8s_endpoint_url | default("") }}" 
+    kubeconfig "/vagrant/kubeconfig" "{{ k8s_context }}"
+    pods verified
+    fallthrough in-addr.arpa ip6.arpa
+  }
+  {% endif %}
+
+  forward . 8.8.8.8 9.9.9.9
+  reload
+}

@@ -1,0 +1,6 @@
+#jinja2: lstrip_blocks: "True"
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "{{ istio_vm_service_account }}"
+  namespace: "{{ istio_vm_namespace }}"

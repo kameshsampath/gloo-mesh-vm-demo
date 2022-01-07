@@ -1,0 +1,11 @@
+- hosts: localhost
+
+  vars_files:
+     - vars.yml
+
+  tasks:
+    - name: "Replace default to {{ inventory_hostname }}"
+      ansible.builtin.replace:
+        path: work/.kube/mgmt.config
+        regexp: ^(\s*)(name|cluster|user|current-context)?(:\s*)default$
+        replace: \g<1>\g<2>\g<3>mgmt

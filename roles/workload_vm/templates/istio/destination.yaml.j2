@@ -1,0 +1,19 @@
+apiVersion: discovery.mesh.gloo.solo.io/v1
+kind: Destination
+metadata:
+  name: "{{ istio_vm_app }}-{{ istio_vm_namespace }}-{{ istio_cluster }}"
+  namespace: gloo-mesh
+spec:
+  kubeService:
+    labels:
+      app: {{ istio_vm_app }}
+    ref:
+      clusterName: {{ istio_cluster }}
+      name: {{ istio_vm_app }}
+      namespace: {{ istio_vm_namespace }}
+    workloadSelectorLabels:
+      app: {{ istio_vm_app }}
+#      version: canary
+  mesh:
+    name: "istiod-istio-system-{{ istio_cluster }}"
+    namespace: gloo-mesh

@@ -1,0 +1,62 @@
+- include: setup_RedHat.yml
+  when: ansible_os_family == "RedHat"
+
+- include: setup_Debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: "Install Python Packages"
+  ansible.builtin.pip:
+    name: 
+    - kubernetes>=12.0.0
+    - boto
+    - botocore
+    - boto3
+    - PyYAML
+
+- name: "Install Kubernetes Core Tools"
+  become: yes
+  community.general.snap:
+    classic: yes
+    name: 
+      - kubectl
+      - helm
+
+- name: "Download kustomize"
+  get_url:
+    url: "https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.4.0/kustomize_v4.4.0_linux_amd64.tar.gz"
+    checksum: "sha256:bf3a0d7409d9ce6a4a393ba61289047b4cb875a36ece1ec94b36924a9ccbaa0f"
+    dest: /tmp/kustomize_v4.4.0_linux_amd64.tar.gz
+
+- name: "Install kustomize"
+  become: yes
+  unarchive:
+    src: /tmp/kustomize_v4.4.0_linux_amd64.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+    mode: 0755
+
+- name: "Install Kubernetes Helper Tools"
+  become: yes
+  get_url:
+    mode: 0755
+    url: "{{ item.url }}"
+    dest: "/usr/local/bin/{{ item.name}}"
+  loop:
+    - {name: "kubectx",url: "https://raw.githubusercontent.com/ahmetb/kubectx/master/kubectx"}
+    - {name: "kubens",url: "https://raw.githubusercontent.com/ahmetb/kubectx/master/kubens"}
+  loop_control:
+     label: "{{ item.name }}"
+
+- name: "Download kubectl (.kubectl_aliases) aliases"
+  get_url:
+    url: "https://raw.githubusercontent.com/ahmetb/kubectl-alias/master/.kubectl_aliases"
+    dest: "{{ ansible_env.HOME }}"
+    mode: 0755
+
+- name: "Add kubectl aliases to the bash profile"
+  ansible.builtin.blockinfile:
+    marker: "# {mark} ANSIBLE MANAGED BLOCK kubectlaliases"
+    block: |
+      [ -f ~/.kubectl_aliases ] && source ~/.kubectl_aliases
+      PATH=/usr/local/bin:$PATH
+    dest: "{{ ansible_env.HOME }}/.bashrc"

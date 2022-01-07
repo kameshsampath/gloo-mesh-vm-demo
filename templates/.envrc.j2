@@ -1,0 +1,31 @@
+export DEMO_HOME="{{ playbook_dir }}"
+export DEMO_WORK_DIR="${DEMO_HOME}/work"
+export KUBECONFIG_DIR="$DEMO_WORK_DIR/.kube"
+
+export KUBECTL_VERSION={{ kubernetes_cli_version }}
+
+export GLOO_MESH_LICENSE_KEY="$GLOO_MESH_GATEWAY_LICENSE_KEY"
+
+export ISTIO_HOME=$(asdf where istio)
+export ISTIO_VERSION=$(istioctl version --remote=false -o json | jq -r  '.clientVersion.version' -)
+export ISTIO_REVISION="${ISTIO_VERSION//\./-}"
+
+PATH_add "$ISTIO_HOME/bin"
+
+{% for k,v in gloo_clusters.items() %}
+export {{ k|upper }}={{v.k8s_context}}
+{% endfor %}
+
+PATH_add "$DEMO_WORK_DIR/bin"
+
+export KUBECONFIG="$KUBECONFIG_DIR/config"
+
+# VM and Istio
+export VM_APP={{ istio_vm_app }}
+export VM_NAMESPACE={{ istio_vm_namespace }}
+# this directory will be inside the vm
+export WORK_DIR={{ istio_vm_workdir }}
+export SERVICE_ACCOUNT={{ istio_vm_service_account }}
+export CLUSTER_NETWORK={{ istio_cluster_network }}
+export VM_NETWORK={{ istio_vm_network }}
+export CLUSTER={{ istio_cluster}}

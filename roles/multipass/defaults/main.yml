@@ -1,0 +1,25 @@
+cloud_init_user_data_file: "{{ playbook_dir }}/templates/user-data"
+multipass_vm_name_query: 'list[*].name'
+multipass_vm_ip_query: 'info.{{ multipass_vm_name }}.ipv4'
+multipass_vms:
+ - name: mgmt
+   cpus: 4
+   mem: 4g
+   disk: 20g
+   role:
+    - kubernetes
+    - gloo
+    - management
+ - name: cluster1
+   cpus: 4
+   mem:  8g
+   disk: 20g
+   role:
+    - kubernetes
+    - gloo
+    - workload
+ - name: vm1
+   cpus: 2
+   mem: 2g
+   disk: 20g
+   role: []

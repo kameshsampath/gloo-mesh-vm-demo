@@ -1,0 +1,47 @@
+- name: "Add Google Cloud SDK"
+  become: yes
+  yum_repository:
+    name: Google-Cloud-SDK
+    description: Google Cloud SDK
+    file: google-cloud-sdk
+    baseurl: https://packages.cloud.google.com/yum/repos/cloud-sdk-el8-x86_64
+    gpgcheck: yes
+    enabled: yes
+    repo_gpgcheck: no
+    gpgkey:
+      - 'https://packages.cloud.google.com/yum/doc/yum-key.gpg'
+      - 'https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg'
+
+- name: "Update to Latest Packages"
+  become: yes
+  ansible.builtin.dnf:
+    name: 
+      - "*"
+    state: latest
+
+- name: "Install Packages"
+  become: yes
+  ansible.builtin.dnf:
+    name:
+      - git
+      - wget
+      - curl
+      - vim
+      - lsof
+      - net-tools
+      - iputils
+      - jq
+      - traceroute
+      - unzip
+      - google-cloud-sdk
+      - "@nodejs:14/default"
+      - strongswan
+      - httpie
+      - snapd
+  
+- name: "Enable Classic snap support"
+  become: yes
+  file:
+    state: link
+    src: /var/lib/snapd/snap
+    dest: /snap

@@ -1,0 +1,81 @@
+- name: "Deploy Kubernetes"
+  hosts: kubernetes
+  become: yes
+  vars_files:
+    - vars.yml
+  roles:
+    - role: k3s
+  tasks:
+    - name: "Ensure Work Directories"
+      become: no
+      local_action:
+        module: file
+        path: "{{ item }}"
+        state: directory
+      loop:
+        - "{{ work_dir }}"
+        - "{{ kubeconfig_dir }}"
+
+    - name: "Copy kubeconfig"
+      ansible.builtin.slurp:
+        src: ~{{ ansible_user }}/.kube/config
+      register: kubeconfig_result
+
+    - name: "Copy Kubeconfig"
+      become: no
+      local_action:
+        module: copy
+        dest: "{{ kubeconfig_dir }}/{{ inventory_hostname }}.config"
+        content: "{{ kubeconfig_result.content | b64decode }}"
+
+    - name: "Ensure right permissions to kubeconfig directory"
+      become: no
+      local_action:
+        module: file
+        state: directory
+        recurse: yes
+        path: "{{ work_dir }}/.kube"
+        mode: "0700"
+
+    - name: "Setup .envrc"
+      become: no
+      run_once: True
+      local_action:
+        module: blockinfile
+        block: "{{ lookup('template', playbook_dir + '/templates/.envrc.j2') }}"
+        dest: "{{ work_dir }}/.envrc"
+        marker: "# {mark} ANSIBLE MANAGED BLOCK vm-demo"
+        create: yes
+
+    - name: "direnv allow"
+      become: no
+      local_action:
+        module: command
+        argv:
+          - direnv
+          - allow
+          - "{{ playbook_dir }}"
+
+    - name: "Merge Kubconfig"
+      set_fact: 
+        kubeconfig: "{{ lookup('fileglob', kubeconfig_dir +'/*.config') | regex_replace(',',':') }}"
+     
+    - name: "Merge and Flatten Kubeconfig"
+      become: no
+      local_action:
+        module: ansible.builtin.command
+        argv:
+          - kubectl 
+          - config
+          - view 
+          - --flatten
+      register: merged_kubeconfig
+      environment:
+          KUBECONFIG: "{{ kubeconfig  }}"
+        
+    - name: "Update kubeconfig"
+      become: no
+      local_action:
+        module: copy
+        dest: "{{ kubeconfig_dir }}/config"
+        content: "{{ merged_kubeconfig.stdout | from_yaml | to_nice_yaml(indent=2) }}"

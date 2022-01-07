@@ -1,0 +1,64 @@
+- name: "Add Google Cloud public key"
+  become: yes
+  ansible.builtin.apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    keyring: /usr/share/keyrings/cloud.google.gpg
+    state: present
+
+- name: "Add Google Cloud SDK Repository"
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main
+    state: present 
+
+- name: "Install Packages"
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+    pkg:
+      - python3-pip
+      - git
+      - wget
+      - curl
+      - gnupg2
+      - vim
+      - net-tools
+      - arping
+      - jq
+      - traceroute
+      - unzip
+      - apt-transport-https
+      - ca-certificates
+      - httpie
+      - google-cloud-sdk
+
+- name: "Check if Node v14.x"
+  ansible.builtin.command:
+    argv:
+      - node
+      - "--version" 
+  register: node_version_result
+  ignore_errors: true
+  changed_when: False
+
+- name: "Set Node Version"
+  set_fact:
+    node_version: "{{ node_version_result.stdout | regex_replace('^v(.*)$', '\\1') }}"
+  when: node_version_result.rc == 0
+
+- name: "Add NodeSource repo"
+  become: yes
+  shell: |
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+  register: add_nodesource_repo 
+  when: node_version is not defined and not (node_version is version('14.0.0','ge',version_type='semver'))
+
+- name: "Install nodejs"
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+    pkg:
+      - nodejs
+    state: latest
+  when: add_nodesource_repo.rc is defined and add_nodesource_repo.rc == 0
+

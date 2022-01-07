@@ -1,0 +1,47 @@
+- name: "Stop Istio"
+  become: yes
+  service:
+    name: istio
+    state: stopped
+  ignore_errors: yes
+  when: clean_istio_vm_files
+
+- name: "Update .vimrc"
+  ansible.builtin.copy:
+    content: |
+      set ts=2
+      set sts=2
+      set sw=2
+      set expandtab
+      syntax on
+      set ruler
+      set number
+    dest: "{{ ansible_env.HOME }}/.vimrc"
+
+- name: "Copy .vimrc to root home"
+  become: yes
+  copy:
+    remote_src: true
+    src: "{{ ansible_env.HOME }}/.vimrc"
+    dest: "/root/.vimrc"
+    mode: 0644
+
+- name: "Set Service IP Facts"
+  set_fact:
+    # making sure not to choose the default virutal box NAT IP
+    istio_svc_ip: "{{ ansible_all_ipv4_addresses | sort | last }}"
+
+- name: "Install blue-green-canary application"
+  include: app.yml
+
+- name: "Debug::ServiceIP"
+  debug:
+   var: istio_svc_ip
+
+- name: "Configure DNS"
+  include: dns.yml
+  when: dns_enabled
+
+- name: "Setup Istio VM"
+  include: configure_istio_vm.yml
+  when: istio_enabled

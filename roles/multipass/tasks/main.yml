@@ -1,0 +1,56 @@
+- name: "Query existing multipass vms"
+  ansible.builtin.command:
+    argv:
+      - multipass
+      - list
+      - --format=json
+  register: vm_check_result
+  changed_when: False
+  ignore_errors: true
+
+- name: "Set multipass vms JSON Facts"
+  set_fact:
+    multipass_vms_json: "{{ vm_check_result.stdout | from_json }}"
+  when: not vm_check_result.failed
+
+- name: "Set if no vms exist"
+  set_fact:
+    no_multipass_vms: "{{ vm_check_result.failed or multipass_vms_json.list | length == 0 }}"
+
+- debug: 
+   var: multipass_vms_json
+
+- name: "Create multipass VMs"
+  ansible.builtin.command:
+      argv:
+        - multipass
+        - launch
+        - "--name={{ multipass_vm_item.name }}"
+        - "--cpus={{ multipass_vm_item.cpus }}"
+        - "--mem={{ multipass_vm_item.mem }}"
+        - "--disk={{ multipass_vm_item.disk }}"
+        - "--cloud-init={{ multipass_vm_item.cloud_init_file  | default(cloud_init_user_data_file) }}"
+  loop: "{{ multipass_vms }}"
+  loop_control:
+    label: "{{ multipass_vm_item.name }}"
+    loop_var: multipass_vm_item
+  when: not ( multipass_vms_json.list | selectattr('name', 'contains', multipass_vm_item.name) )
+  register: multipass_vms_result
+
+- name: "Get multipass VMs Info"
+  ansible.builtin.command:
+    argv:
+      - multipass
+      - info
+      - --all
+      - --format=json
+  register: multipass_vms_info_result
+
+- name: "Set multipass vms JSON Facts"
+  set_fact:
+    multipass_vms_json: "{{ multipass_vms_info_result.stdout | from_json }}"
+  
+- name: "Update Inventory"
+  ansible.builtin.template:
+    src: "{{ playbook_dir }}/templates/hosts.j2"
+    dest: "{{ playbook_dir }}/inventory/hosts"

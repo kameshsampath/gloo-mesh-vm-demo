@@ -1,0 +1,39 @@
+work_dir: "{{ playbook_dir }}/work"
+kubeconfig_dir: "{{ playbook_dir }}/work/.kube"
+
+#Kubernetes
+kubernetes_cli_version: v1.21.5
+
+# Gloo
+gloo_clusters:
+  mgmt:
+    cloud: k3s
+    k8s_context: mgmt
+    cluster_name: mgmt
+  cluster1:
+    cloud: k3s
+    k8s_context: cluster1
+    cluster_name: cluster1
+
+# Istio 
+istio_clusters:
+   cluster1:
+     k8s_context: "{{ gloo_clusters.cluster1.k8s_context }}"
+     version: "{{ lookup('env','ISTIO_VERSION') }}"
+     install: yes
+istio_enabled: yes
+istio_vm_app: vm-demos-app
+istio_vm_namespace: vm-demos
+istio_vm_workdir: "/home/{{ ansible_user }}/istio-vm/files"
+istio_vm_service_account: vm-service-account
+istio_cluster_network: network1
+istio_vm_network: vm-network
+istio_cluster: cluster1
+
+# Workload 
+workload_istio_gateway_ns: istio-system
+workload_istio_svc_name: istio-system
+istiod_nodeport_query: 'spec.ports[?name == `tcp-istiod` ].nodePort'
+
+force_app_install: no
+use_nodeport: false

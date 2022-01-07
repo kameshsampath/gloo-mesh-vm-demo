@@ -1,0 +1,20 @@
+workload_istio_gateway_ns: istio-system
+workload_istio_svc_name: istio-ingressgateway
+istiod_nodeport_query: 'spec.ports[?name == `tcp-istiod` ].nodePort'
+
+coredns_version: "1.8.4"
+coredns_config_dir: /etc/coredns
+dns_enabled: yes
+core_dns_use_k8s: no
+force_app_install: no
+use_nodeport: false
+
+# Istio 
+istio_enabled: yes
+istio_vm_app: blue-green-canary
+istio_vm_namespace: vm-blue-green-canary
+istio_vm_workdir: "/home/{{ ansible_user }}/istio-vm/files"
+istio_vm_service_account: vm-blue-green-canary
+istio_cluster_network: bgc-network1
+istio_vm_network: bgc-vm-network
+istio_cluster: cluster1

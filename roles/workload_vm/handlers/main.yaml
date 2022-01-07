@@ -1,0 +1,17 @@
+- name: "Restart Istio"
+  become: yes
+  service:
+    name: istio
+    state: restarted
+  tags:
+   - istio
+   - app
+
+- name: "Restart Blue Green Canary"
+  become: yes
+  ansible.builtin.systemd:
+    state: restarted
+    daemon_reload: true
+    name: blue-green-canary.service
+  tags:
+   - app

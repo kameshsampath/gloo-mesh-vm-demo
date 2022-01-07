@@ -1,0 +1,11 @@
+#cloud-config
+users:
+  - default
+  - name: ubuntu
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDaHN5Wb8vYuMVSlym89YhaJ7X2VAeGQmgZpvxM5m5fnzcKCVPM72iNI8RuCnYeAAIJr32OlIFaQQpHTxGpPj004wRxobvhJ457IJGLc8zFj5+seL+BkM5xveZ8b+L2J5UR4EGB8UICCB/qRYowMwPmYnGxXrXVjVF/oT1Kq3ZQ5FpO0yKAK92z7L01rIYDrTLKmrzneOmm3i+7UAjPnIRU2xkO/vNgwtpLIUHO27PM8D8qYmUspGjfr96AkWM6J/uMBffb2jpz49jBr6vaVe5+GpjtccS/mIhI2ANfkr4Gd3WYLRC6DL1kLWhTbApgkQJvUMYjTnBG9m3biq2IaZ0Oc4s3kkrvn2Y7vdbwdIzcRYha4h+ovKs7moaKSN2zqFqzH5hFYmMp8woj1P6ub37k7ev2hFnBB4pCuD9NhLU5EI2o9UKoXPyTCjItn+aDzKYS8M9LLYgH4RKBE4OkD4PpmmkZYLLc6ec6bSgP9Np3M1f0MXZT8bGDworcDVRvKuU= ubuntu insecure public key"
+    # password generated using python $DEMO_HOME/bin/mkpasswd.py
+    password: "$6$rounds=656000$bxo/LO22lvUl4WCy$s20dy/HYcmb.EOvusWCHBA8zm03VZun/846nmzBQ9S7BxNt7N5v4XX/Dh5CHEuQ0phbRENqtMdN7AXZaraKaB/"
