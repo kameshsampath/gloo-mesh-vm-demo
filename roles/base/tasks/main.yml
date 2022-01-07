@@ -1,7 +1,9 @@
-- include: setup_RedHat.yml
+- name: "Set up RedHat Packages"
+  include: setup_RedHat.yml
   when: ansible_os_family == "RedHat"
 
-- include: setup_Debian.yml
+- name: "Set up Debian/Ubuntu Packages"
+  include: setup_Debian.yml
   when: ansible_os_family == "Debian"
 
 - name: "Install Python Packages"
@@ -50,13 +52,13 @@
 - name: "Download kubectl (.kubectl_aliases) aliases"
   get_url:
     url: "https://raw.githubusercontent.com/ahmetb/kubectl-alias/master/.kubectl_aliases"
-    dest: "{{ ansible_env.HOME }}"
+    dest: ~{{ ansible_user }}
     mode: 0755
 
 - name: "Add kubectl aliases to the bash profile"
   ansible.builtin.blockinfile:
-    marker: "# {mark} ANSIBLE MANAGED BLOCK kubectlaliases"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK .kubectl_aliases"
     block: |
       [ -f ~/.kubectl_aliases ] && source ~/.kubectl_aliases
       PATH=/usr/local/bin:$PATH
-    dest: "{{ ansible_env.HOME }}/.bashrc"
+    dest: ~{{ ansible_user }}/.bashrc

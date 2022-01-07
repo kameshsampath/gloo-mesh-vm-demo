@@ -31,9 +31,10 @@ istio_vm_network: vm-network
 istio_cluster: cluster1
 
 # Workload 
-workload_istio_gateway_ns: istio-system
-workload_istio_svc_name: istio-system
+workload_istio_gateway_ns: istio-gateways
+workload_istio_svc_name: ingressgateway
 istiod_nodeport_query: 'spec.ports[?name == `tcp-istiod` ].nodePort'
 
+clean_istio_vm_files: yes
 force_app_install: no
 use_nodeport: false

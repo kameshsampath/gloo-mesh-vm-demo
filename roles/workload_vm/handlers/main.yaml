@@ -7,11 +7,11 @@
    - istio
    - app
 
-- name: "Restart Blue Green Canary"
+- name: "Restart App"
   become: yes
   ansible.builtin.systemd:
     state: restarted
     daemon_reload: true
-    name: blue-green-canary.service
+    name: "{{ instance_app_image_name }}-app.service"
   tags:
    - app

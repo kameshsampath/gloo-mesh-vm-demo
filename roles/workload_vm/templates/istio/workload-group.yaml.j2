@@ -8,7 +8,6 @@ spec:
   metadata:
     labels:
       app: {{ istio_vm_app }}
-      # version: canary
   template:
     serviceAccount: "{{ istio_vm_service_account }}"
     network: "{{ istio_vm_network }}"

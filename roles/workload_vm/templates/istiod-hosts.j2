@@ -1,0 +1,16 @@
+#jinja2: lstrip_blocks: "True"
+{%if one_lb %}
+  {%if istio_revision is defined %}
+  {{ lb_ips }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
+  {% else %}
+  {{ lb_ips }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+  {% endif %}
+  {% elif multi_lb %}
+  {%if istio_revision is defined %}
+  {{ lb_ips[0] }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
+  {{ lb_ips[1] }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
+  {% else %}
+  {{ lb_ips[0] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+  {{ lb_ips[1] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
+  {% endif %}
+{% endif %}

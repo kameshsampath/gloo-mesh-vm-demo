@@ -1,0 +1,16 @@
+[Unit]
+Description={{ instance_app_image_name[0]|upper }}{{ instance_app_image_name[1:]|upper }} App
+Documentation=https://github.com/kameshsampath/istio-demo-apps
+After=network.target
+
+[Service]
+Type=simple
+User={{ ansible_user }}
+Group={{ ansible_user }}
+ExecStart=/usr/local/bin/application
+Restart=on-failure
+TimeoutStopSec=30
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

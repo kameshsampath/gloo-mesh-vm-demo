@@ -35,7 +35,7 @@ create-vms: ensure-env
 
 .PHONY:	create-kube-clusters
 create-kube-clusters: ensure-env
-	ansible-playbook -i localhost -c local clusters.yml $(EXTRA_ARGS)
+	ansible-playbook k3s.yml $(EXTRA_ARGS)
 	$(MAKE) ensure-env
 
 .PHONY:	deploy-base

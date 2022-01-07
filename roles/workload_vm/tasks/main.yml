@@ -6,6 +6,27 @@
   ignore_errors: yes
   when: clean_istio_vm_files
 
+- name: "kuebctl completions to  .bashrc"
+  ansible.builtin.blockinfile:
+    marker: "# {mark} ANSIBLE MANAGED BLOCK kubectl"
+    block: |
+      source <(kubectl completion bash)
+      alias k=kubectl
+      complete -F __start_kubectl k
+    dest: ~{{ ansible_user }}/.bashrc
+
+- name: "Ensure kuebconfig directory"
+  ansible.builtin.file:
+    state: directory
+    path: ~{{ansible_user}}/.kube
+    mode: "0700"
+    
+- name: "Copy kubeconfig to vm"
+  ansible.builtin.copy:
+    src: "{{ kubeconfig_dir }}/config"
+    dest: ~{{ansible_user}}/.kube/config
+    mode: "700"
+
 - name: "Update .vimrc"
   ansible.builtin.copy:
     content: |
@@ -16,31 +37,26 @@
       syntax on
       set ruler
       set number
-    dest: "{{ ansible_env.HOME }}/.vimrc"
+    dest: ~{{ ansible_user }}/.vimrc
 
 - name: "Copy .vimrc to root home"
   become: yes
   copy:
     remote_src: true
-    src: "{{ ansible_env.HOME }}/.vimrc"
+    src: ~{{ ansible_user }}/.vimrc
     dest: "/root/.vimrc"
     mode: 0644
 
 - name: "Set Service IP Facts"
   set_fact:
-    # making sure not to choose the default virutal box NAT IP
-    istio_svc_ip: "{{ ansible_all_ipv4_addresses | sort | last }}"
+    istio_svc_ip: "{{ ansible_default_ipv4.address }}"
 
-- name: "Install blue-green-canary application"
+- name: "Install {{ instance_app_image_version }} application"
   include: app.yml
 
 - name: "Debug::ServiceIP"
   debug:
    var: istio_svc_ip
-
-- name: "Configure DNS"
-  include: dns.yml
-  when: dns_enabled
 
 - name: "Setup Istio VM"
   include: configure_istio_vm.yml

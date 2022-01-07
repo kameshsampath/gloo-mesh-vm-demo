@@ -9,6 +9,6 @@ spec:
   address: "{{ istio_svc_ip}}"
   labels:
     app: "{{ istio_vm_app }}"
-    # version: canary
+    version: '{{ instance_app_image_version | regex_replace(semver_regexp,"v\g<major>") }}'
     instance_id: {{ instance_id }}
   serviceAccount: "{{ istio_vm_service_account }}"

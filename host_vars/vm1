@@ -1,7 +1,5 @@
 instance_id: vm1
-bgc_app_color: yellow
-bgc_message: Hola ✋🏽
-bgc_text_color: white
 
-instance_app_image: quay.io/kameshsampath/recommendation
+instance_app_image_repo: quay.io/kameshsampath
+instance_app_image_name: recommendation
 instance_app_image_version: 1.0.0

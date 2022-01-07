@@ -4,8 +4,8 @@ multipass_vm_ip_query: 'info.{{ multipass_vm_name }}.ipv4'
 multipass_vms:
  - name: mgmt
    cpus: 4
-   mem: 4g
-   disk: 20g
+   mem: 8g
+   disk: 30g
    role:
     - kubernetes
     - gloo
@@ -13,7 +13,7 @@ multipass_vms:
  - name: cluster1
    cpus: 4
    mem:  8g
-   disk: 20g
+   disk: 30g
    role:
     - kubernetes
     - gloo
@@ -21,5 +21,5 @@ multipass_vms:
  - name: vm1
    cpus: 2
    mem: 2g
-   disk: 20g
+   disk: 30g
    role: []

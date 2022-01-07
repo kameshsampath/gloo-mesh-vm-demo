@@ -22,68 +22,48 @@
     state: absent
   with_items:
     - /opt/app
-    - /opt/blue-green-canary.tar.gz
+    - /opt/application.tar.gz
   when: force_app_install | default(False)
 
-- name: "Export blue-green-canary app to tarball"
+- name: "Export {{ instance_app_image_name }} app to tarball"
   become: yes
   ansible.builtin.command:
     argv:
       - crane
       - export 
-      - ghcr.io/kameshsampath/blue-green-canary 
-      - /opt/blue-green-canary.tar.gz
-    creates: /opt/blue-green-canary.tar.gz
+      - "{{ instance_app_image_repo }}/{{ instance_app_image_name }}:{{ instance_app_image_version }}"
+      - /opt/application.tar.gz
+    creates: /opt/application.tar.gz
   register: app_install
 
 - name: "Extract App"
   become: yes
   unarchive:
-    src: "/opt/blue-green-canary.tar.gz"
-    dest: "/opt"
+    src: "/opt/application.tar.gz"
+    dest: "/usr/local/bin"
     remote_src: yes
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
-    creates: "/opt/app"
+    creates: "/usr/local/bin/application"
     include:
-      - app
+      - application
   when: app_install.rc == 0
   notify:
-   - "Restart Blue Green Canary"
+   - "Restart App"
 
-- name: "Copy 'Blue Green Canary App' env file"
+- name: "Create '{{ instance_app_image_name }}' systemd unit"
   become: yes
   ansible.builtin.template:
-    src: "app/.env.j2"
-    dest: "/opt/app/.env.local"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    src: "app/app.service.j2"
+    dest: "/etc/systemd/system/{{ instance_app_image_name }}-app.service"
     mode: '0644'
   notify:
-   - "Restart Blue Green Canary"
-    
-- name: "Create 'Blue Green Canary App' systemd unit"
-  become: yes
-  ansible.builtin.template:
-    src: "app/blue-green-canary.service.j2"
-    dest: "/etc/systemd/system/blue-green-canary.service"
-    mode: '0644'
-  notify:
-   - "Restart Blue Green Canary"
+   - "Restart App"
 
-- name: "Enable and start blue-green-canary.service service"
+- name: "Enable and start {{ instance_app_image_name }} service"
   become: yes
   ansible.builtin.systemd:
     enabled: true
     daemon_reload: true
     state: started
-    name: blue-green-canary.service
-
-- name: "Update Service Port"
-  lineinfile:
-    backrefs: yes
-    regex: '^(\s*"start": "next start)(",)$'
-    line: '\1 -p 8080\2'
-    path: "/opt/app/package.json"
-  notify:
-   - "Restart Blue Green Canary"
+    name: "{{ instance_app_image_name }}-app.service"

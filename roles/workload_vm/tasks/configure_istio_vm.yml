@@ -1,10 +1,15 @@
 - name: "Extract Istio Cluster version and revision"
   set_fact:
     istio_version: "{{ istio_clusters[istio_cluster].version }}"
+    istio_revision: "{{ istio_clusters[istio_cluster].version  | kameshsampath.kubernetes_spices.version_to_revision }}"
 
 - name: 'Using Istio Version'
   debug:
    var: istio_version
+
+- name: 'Using Istio Revision'
+  debug:
+   var: istio_revision
 
 - name: "Download Istio"
   get_url:
@@ -23,14 +28,14 @@
   ansible.builtin.blockinfile:
     marker: "# {mark} ANSIBLE MANAGED BLOCK Istio {{ istio_version }}"
     block: |
-      ISTIO_HOME=~/istio-{{ istio_version }}
+      ISTIO_HOME=~{{ ansible_user }}/istio-{{ istio_version }}
       PATH=$ISTIO_HOME/bin:$PATH
-    dest: "{{ ansible_env.HOME }}/.bashrc"
+    dest: ~{{ ansible_user }}/.bashrc
   when: istio_install
 
 - name: "Clean existing Istio VM files"
   include: clean_istio_vm_files.yml
-  when: clean_istio_vm_files
+  when: clean_istio_vm_files | bool
 
 - name: "Lookup Istio Ingress Gateway"
   kubernetes.core.k8s_info:
@@ -88,58 +93,36 @@
   debug:
     var: lb_ips
 
-- name: "Remove istiod entry from hosts file"
+- name: "Remove istiod entry to hosts file"
   become: yes
   blockinfile:
-    marker: "# {mark} ANSIBLE MANAGED BLOCK ISTIO"
-    path: "/etc/hosts"
-    block: |
-      {%if one_lb %}
-      {{ lb_ips }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local      
-      {% elif multi_lb %}
-      {{ lb_ips[0] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
-      {{ lb_ips[1] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
-      {% endif %}
     state: absent
-  when: clean_istio_vm_files 
+    marker: "# {mark} ANSIBLE MANAGED BLOCK-istiod"
+    path: "/etc/hosts"
+    block: "{{ lookup('template','istiod-hosts.j2') }}"
   notify:
-  - "Restart Istio"
+    - "Restart Istio"
 
 - name: "Add istiod entry to hosts file"
   become: yes
   blockinfile:
-    marker: "# {mark} ANSIBLE MANAGED BLOCK"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK-istiod"
     path: "/etc/hosts"
-    block: |
-      {%if one_lb %}
-      {%if istio_revision is defined %}
-      {{ lb_ips }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
-      {% else %}
-      {{ lb_ips }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
-      {% endif %}
-      {% elif multi_lb %}
-      {%if istio_revision is defined %}
-      {{ lb_ips[0] }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
-      {{ lb_ips[1] }}   istiod-{{ istio_revision }}.istio-system.svc istiod-{{ istio_revision }}.istio-system.svc.cluster.local
-      {% else %}
-      {{ lb_ips[0] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
-      {{ lb_ips[1] }}   istiod.istio-system.svc istiod.istio-system.svc.cluster.local
-      {% endif %}
-      {% endif %}
+    block: "{{ lookup('template','istiod-hosts.j2') }}"
   notify:
-  - "Restart Istio"
+    - "Restart Istio"
 
 - name: "Create or Update VM Workload Namespace"
   kubernetes.core.k8s:
     state: present
-    context: "{{ gloo_clusters.cluster1.k8s_context }}"
+    context: "{{ gloo_clusters[istio_cluster].k8s_context }}"
     template:
       path: 'istio/namespace.yaml.j2'
 
 - name: "Create or Update VM Workload ServiceAccount"
   kubernetes.core.k8s:
     state: present
-    context: "{{ gloo_clusters.cluster1.k8s_context }}"
+    context: "{{ gloo_clusters[istio_cluster].k8s_context }}"
     template:
       path: 'istio/sa.yaml.j2'
     
@@ -185,9 +168,7 @@
 - name: "Generate Workload Files"
   ansible.builtin.command:
     argv:
-      - "{{ ansible_env.HOME }}/istio-{{ istio_version }}/bin/istioctl"
-      - "--context"
-      - "{{ istio_cluster }}"
+      - "~{{ ansible_user }}/istio-{{ istio_version }}/bin/istioctl"
       - x
       - workload
       - entry
@@ -199,9 +180,11 @@
       - "--clusterID"
       - "{{ istio_cluster }}"
       - "--kubeconfig"
-      - "{{ ansible_env.HOME }}/.kube/config"
+      - "~{{ ansible_user }}/.kube/config"
       - "--context"
-      - "{{ gloo_clusters.cluster1.k8s_context }}"
+      - "{{ gloo_clusters[istio_cluster].k8s_context }}"
+      - "--revision"
+      - "{{ istio_revision }}"
   register: workload_entry_create
 
 - name: "Install Istio Sidecar(Debian)"
@@ -239,8 +222,17 @@
     backup: yes
     backrefs: yes
     path: /etc/istio/envoy/sidecar.env
-    regexp: "^#(\\s*ISTIO_SVC_IP=).*$"
-    line: "ISTIO_SVC_IP={{ istio_svc_ip }}"
+    regexp: ^\s*#\s*(\s*ISTIO_SVC_IP=).*$
+    line: \g<1>{{ istio_svc_ip }}
+
+- name: "Set Istiod CA_ADDR"
+  become: yes
+  lineinfile:
+    backup: yes
+    backrefs: yes
+    path: /etc/istio/envoy/sidecar.env
+    regexp: ^\s*#\s*(\s*CA_ADDR=).*$
+    line: \g<1>istiod-{{ istio_revision }}.istio-system.svc:{{ istiod_port }}
 
 - name: "Set Istiod CA_ADDR"
   become: yes
@@ -249,7 +241,7 @@
     backrefs: yes
     path: /etc/istio/envoy/sidecar.env
     regexp: ^#(\s*CA_ADDR=).*$
-    line: \g<1>istiod.istio-system.svc:{{ istiod_nodeport }}
+    line: \g<1>istiod-{{ istio_revision }}.istio-system.svc:{{ istiod_nodeport }}
   when: use_nodeport
 
 - name: "Install the root certificate root-cert.pem"
@@ -286,7 +278,7 @@
     backrefs: yes
     path: "{{ istio_vm_workdir }}/mesh.yaml"
     regexp: ^(\s*discoveryAddress:\s*).*$
-    line: \g<1>istiod.istio-system.svc:{{ istiod_nodeport }}
+    line: \g<1>istiod-{{ istio_revision }}.istio-system.svc:{{ istiod_nodeport }}
   when: use_nodeport
 
 - name: "Install the Mesh Config"
