@@ -1,0 +1,17 @@
+# This section includes base Calico installation configuration.
+# For more information, see: https://docs.projectcalico.org/v3.21/reference/installation/api#operator.tigera.io/v1.Installation
+apiVersion: operator.tigera.io/v1
+kind: Installation
+metadata:
+  name: default
+spec:
+  # Configures Calico networking.
+  calicoNetwork:
+    # Note: The ipPools section cannot be modified post-install.
+    ipPools:
+    - blockSize: {{ k3s_cluster_cidr | ansible.netcommon.ipaddr('prefix') }}
+      cidr: {{ k3s_cluster_cidr }}
+      encapsulation: VXLANCrossSubnet
+      natOutgoing: Enabled
+      nodeSelector: all()
+    containerIPForwarding: Enabled

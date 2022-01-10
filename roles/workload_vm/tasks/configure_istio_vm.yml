@@ -34,7 +34,7 @@
   when: istio_install
 
 - name: "Clean existing Istio VM files"
-  include: clean_istio_vm_files.yml
+  include_tasks: clean_istio_vm_files.yml
   when: clean_istio_vm_files | bool
 
 - name: "Lookup Istio Ingress Gateway"
@@ -76,7 +76,6 @@
     name: cluster1
     context: "cluster1"
   register: node_ip_result
-  when: use_nodeport 
 
 - name: "Set Istiod NodePort"
   set_fact:
@@ -112,6 +111,56 @@
   notify:
     - "Restart Istio"
 
+- name: "Add routes to {{ istio_cluster }} Kubernetes Sevices/Pods"
+  ansible.utils.update_fact:
+    updates: 
+     -  path: "current_netplan.network.ethernets[{{ default_ipv4_interface }}].routes"
+        value: 
+           - to: "{{ istio_cluster_service_ip_cidr }}"
+             via: "{{ node_ip_result.resources | first | json_query('status.addresses[?type==`InternalIP`].address') | first }}"         
+           - to:  "{{ istio_cluster_pod_ip_cidr }}"
+             via: "{{ node_ip_result.resources | first | json_query('status.addresses[?type==`InternalIP`].address') | first }}"
+  register: updated_netplan
+
+- name: "Updated netplan" 
+  debug: 
+    var: updated_netplan.current_netplan
+    
+- name: Update netplan
+  become: yes
+  ansible.builtin.copy:
+    dest: /etc/netplan/50-cloud-init.yaml
+    content: "{{ updated_netplan.current_netplan | to_nice_yaml(indent=2)  }}"
+  when: updated_netplan.changed
+  notify:
+    - Apply netplan
+
+- name: Deploy East West Gateway
+  kubernetes.core.k8s:
+    context: "{{ istio_clusters[istio_cluster].k8s_context }}"
+    state: present
+    namespace: "{{ workload_istio_gateway_ns }}"
+    template:
+      - path: "gateways/east-west-gateway.yaml.j2"
+      - path: "gateways/istiod-gateway.yaml.j2"
+      - path: "gateways/istiod-vs.yaml.j2"
+  vars:
+    istio_version: "{{ istio_clusters[istio_cluster].version }}"
+    istio_revision: "{{ istio_clusters[istio_cluster].version | kameshsampath.kubernetes_spices.version_to_revision }}"
+  when: istio_clusters[istio_cluster].install
+
+- name: Deploy istiod Wrapper Service
+  kubernetes.core.k8s:
+    context: "{{ istio_clusters[istio_cluster].k8s_context }}"
+    state: present
+    namespace: "{{ workload_istio_ns }}"
+    template:
+      - path: "gateways/istiod-wrapper-service.yaml.j2"
+  vars:
+    istio_version: "{{ istio_clusters[istio_cluster].version }}"
+    istio_revision: "{{ istio_clusters[istio_cluster].version | kameshsampath.kubernetes_spices.version_to_revision }}"
+  when: istio_clusters[istio_cluster].install
+      
 - name: "Create or Update VM Workload Namespace"
   kubernetes.core.k8s:
     state: present

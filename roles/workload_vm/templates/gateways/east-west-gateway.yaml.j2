@@ -3,9 +3,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: cross-network-gateway
-  {%if istio_revision %}
-  namespace: istio-gateways
-  {% endif %}
+  namespace: {{ workload_istio_gateway_ns }}
 spec:
   selector:
     istio: ingressgateway

@@ -82,7 +82,7 @@
     owner: "{{ ansible_user }}"
     mode: "u=rw,g=,o="
 
-- name: "Replace https://localhost:6443 by https://{{ ansible_host }}:6443"
+- name: Replace https://localhost:6443 by https://ansible_host_ip:6443
   command: >-
     k3s kubectl config set-cluster default
       --server=https://{{ ansible_host | default(ansible_default_ipv4.address)}}:6443
@@ -106,3 +106,7 @@
     src: /usr/local/bin/k3s
     dest: /usr/local/bin/crictl
     state: link
+
+- name: "Deploy and Configure Calico"
+  include_tasks: deploy_calico.yml
+  when: k3s_deploy_calico_network_plugin

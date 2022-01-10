@@ -1,9 +1,9 @@
 - name: "Set up RedHat Packages"
-  include: setup_RedHat.yml
+  include_tasks: setup_RedHat.yml
   when: ansible_os_family == "RedHat"
 
 - name: "Set up Debian/Ubuntu Packages"
-  include: setup_Debian.yml
+  include_tasks: setup_Debian.yml
   when: ansible_os_family == "Debian"
 
 - name: "Install Python Packages"

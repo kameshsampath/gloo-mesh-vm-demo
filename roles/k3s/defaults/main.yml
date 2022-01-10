@@ -1,3 +1,6 @@
 k3s_version: v1.21.8+k3s1
 k3s_server_location: /var/lib/rancher/k3s
 extra_server_args: --no-deploy traefik
+k3s_cluster_cidr: 172.16.0.0/24
+k3s_service_cidr: 172.18.0.0/20
+k3s_deploy_calico_network_plugin: no

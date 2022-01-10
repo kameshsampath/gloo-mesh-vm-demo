@@ -1,11 +1,35 @@
-- hosts: localhost
+- hosts: vms
+  become: yes
 
   vars_files:
      - vars.yml
 
   tasks:
-    - name: "Replace default to {{ inventory_hostname }}"
-      debug:
-        msg: '{{ "1.0.0" | regex_replace(semver_regexp,"v\g<major>") }}'
-      vars:
-        semver_regexp: '^(?P<major>\d+)\.(?P<minor>\d+).(?P<micro>\d+)-*(?P<patch>\w*)$'
+    - debug:
+          msg: "{{ ansible_default_ipv4.interface }}"
+          
+    - name: Get Current netplan
+      ansible.builtin.slurp:
+        src: /etc/netplan/50-cloud-init.yaml
+      register: netplan_result
+      
+    - name: "Set IPV4 facts"
+      set_fact:
+        default_ipv4_interface: "{{ ansible_default_ipv4.interface }}"
+        default_ipv4_gateway: "{{ ansible_default_ipv4.gateway }}"
+        current_netplan_file: "{{ netplan_result.content | b64decode | from_yaml }}"
+    
+    - debug:
+        msg: "{{ current_netplan_file }}" 
+    
+    - name: "Add routes to netplan"
+      ansible.utils.update_fact:
+        updates: 
+         -  path: "current_netplan_file.network.ethernets[{{ default_ipv4_interface }}].routes"
+            value: 
+               - to: '172.18.0.0/20' 
+                 via: "{{ ansible_default_ipv4.gateway }}"
+      register: updated_netplan
+      
+    - debug:
+        msg: "{{ updated_netplan.current_netplan_file | to_nice_yaml(indent=2) }}"

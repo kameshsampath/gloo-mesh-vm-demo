@@ -1,12 +1,9 @@
+workload_istio_ns: istio-system
 workload_istio_gateway_ns: istio-system
 workload_istio_svc_name: istio-ingressgateway
 istiod_nodeport_query: 'spec.ports[?name == `tcp-istiod` ].nodePort'
 semver_regexp: '^(?P<major>\d+)\.(?P<minor>\d+).(?P<micro>\d+)-*(?P<patch>\w*)$'
 
-coredns_version: "1.8.4"
-coredns_config_dir: /etc/coredns
-dns_enabled: no
-core_dns_use_k8s: no
 force_app_install: no
 use_nodeport: false
 

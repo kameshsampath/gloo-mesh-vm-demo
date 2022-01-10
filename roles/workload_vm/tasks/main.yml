@@ -47,17 +47,29 @@
     dest: "/root/.vimrc"
     mode: 0644
 
+- name: Get Current netplan
+  ansible.builtin.slurp:
+    src: /etc/netplan/50-cloud-init.yaml
+  register: netplan_result
+      
+- name: "Set IPV4 facts"
+  set_fact:
+    default_ipv4_interface: "{{ ansible_default_ipv4.interface }}"
+    default_ipv4_address: "{{ ansible_default_ipv4.address }}"
+    default_ipv4_gateway: "{{ ansible_default_ipv4.gateway }}"
+    current_netplan: "{{ netplan_result.content | b64decode | from_yaml }}"
+
 - name: "Set Service IP Facts"
   set_fact:
-    istio_svc_ip: "{{ ansible_default_ipv4.address }}"
+    istio_svc_ip: "{{ default_ipv4_address }}"
 
 - name: "Install {{ instance_app_image_version }} application"
-  include: app.yml
+  include_tasks: app.yml
 
 - name: "Debug::ServiceIP"
   debug:
    var: istio_svc_ip
 
 - name: "Setup Istio VM"
-  include: configure_istio_vm.yml
+  include_tasks: configure_istio_vm.yml
   when: istio_enabled

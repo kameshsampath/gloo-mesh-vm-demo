@@ -15,3 +15,12 @@
     name: "{{ instance_app_image_name }}-app.service"
   tags:
    - app
+
+- name: Apply netplan
+  become: yes
+  ansible.builtin.command: >-
+    netplan apply
+  async: 45
+  poll: 0
+  
+    

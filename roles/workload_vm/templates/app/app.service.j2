@@ -7,6 +7,7 @@ After=network.target
 Type=simple
 User={{ ansible_user }}
 Group={{ ansible_user }}
+Environment=HOSTNAME={{ inventory_hostname }}
 ExecStart=/usr/local/bin/application
 Restart=on-failure
 TimeoutStopSec=30

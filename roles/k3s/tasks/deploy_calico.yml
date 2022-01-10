@@ -1,0 +1,35 @@
+- name: Download Calico Operator Manifest
+  ansible.builtin.get_url:
+     url: https://docs.projectcalico.org/archive/v3.21/manifests/tigera-operator.yaml
+     dest: /tmp/tigera-operator.yaml
+
+- name: Apply Calico Operator
+  command: >-
+    k3s kubectl create -f https://docs.projectcalico.org/archive/v3.21/manifests/tigera-operator.yaml
+      --kubeconfig ~{{ ansible_user }}/.kube/config
+  ignore_errors: yes
+  changed_when: false
+
+- name: Apply Calico Network Plugin
+  template:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item | splitext  | first  }}"
+  loop:
+    - calico-installation-cr.yaml.j2
+    - calico-api-cr.yaml.j2
+  register: calico_k8s_manifests
+
+- name: Wait for the Calico Operator to be Ready
+  command: >-
+    k3s kubectl rollout status --namespace tigera-operator deploy/tigera-operator --timeout=180s
+      --kubeconfig ~{{ ansible_user }}/.kube/config
+  changed_when: false
+  
+- name: Apply Calico CRs
+  command: >-
+    k3s kubectl create -f /tmp/{{ item | splitext  | first  }}
+      --kubeconfig ~{{ ansible_user }}/.kube/config
+  ignore_errors: yes
+  loop:
+    - calico-installation-cr.yaml.j2
+    - calico-api-cr.yaml.j2

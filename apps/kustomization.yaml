@@ -1,0 +1,3 @@
+resources:
+  - github.com/kameshsampath/istio-demo-apps/manifests/httpbin
+  - github.com/kameshsampath/istio-demo-apps/manifests/sleep

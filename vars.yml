@@ -2,8 +2,36 @@ work_dir: "{{ playbook_dir }}/work"
 kubeconfig_dir: "{{ playbook_dir }}/work/.kube"
 
 #Kubernetes
-kubernetes_cli_version: v1.21.5
+kubernetes_cli_version: v1.21.8
 
+# k3s configurations
+k3s_cluster_cidr: 172.16.0.0/24
+k3s_service_cidr: 172.18.0.0/20
+
+# multipass vms
+multipass_vms:
+ - name: mgmt
+   cpus: 4
+   mem: 8g
+   disk: 30g
+   role:
+    - kubernetes
+    - gloo
+    - management
+ - name: cluster1
+   cpus: 4
+   mem:  8g
+   disk: 30g
+   role:
+    - kubernetes
+    - gloo
+    - workload
+ - name: vm1
+   cpus: 2
+   mem: 2g
+   disk: 30g
+   role:
+     - vm
 # Gloo
 gloo_clusters:
   mgmt:
@@ -15,7 +43,7 @@ gloo_clusters:
     k8s_context: cluster1
     cluster_name: cluster1
 
-# Istio 
+# Istio and VM Sidecar
 istio_clusters:
    cluster1:
      k8s_context: "{{ gloo_clusters.cluster1.k8s_context }}"
@@ -29,12 +57,13 @@ istio_vm_service_account: vm-service-account
 istio_cluster_network: network1
 istio_vm_network: vm-network
 istio_cluster: cluster1
+istio_cluster_service_ip_cidr: "{{ k3s_service_cidr }}"
+istio_cluster_pod_ip_cidr: "{{ k3s_cluster_cidr }}"
 
-# Workload 
+# VM Workload 
+workload_istio_ns: istio-system
 workload_istio_gateway_ns: istio-gateways
 workload_istio_svc_name: ingressgateway
-istiod_nodeport_query: 'spec.ports[?name == `tcp-istiod` ].nodePort'
-
 clean_istio_vm_files: yes
 force_app_install: no
 use_nodeport: false

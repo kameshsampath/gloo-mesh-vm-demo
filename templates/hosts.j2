@@ -1,11 +1,11 @@
 localhost ansible_host=127.0.0.1 ansible_connection=local host_checking=false
 
 {%for vm_item in multipass_vms %}
-{{ vm_item.name }} ansible_host={{ multipass_vms_json.info[vm_item.name].ipv4[0] }} ansible_user=ubuntu ansible_ssh_private_key_file={{ playbook_dir }}/inventory/ubuntu
+{{ vm_item.name }} ansible_host={{ multipass_vms_json.info[vm_item.name].ipv4[0] }} ansible_user=ubuntu ansible_ssh_private_key_file=inventory/ubuntu
 {% endfor %}
 
 [kubernetes]
 {{ multipass_vms | selectattr('role', 'contains', 'kubernetes') | map(attribute='name') | join('\n') }}
 
 [vms]
-vm1
+{{ multipass_vms | selectattr('role', 'contains', 'vm') | map(attribute='name') | join('\n') }}

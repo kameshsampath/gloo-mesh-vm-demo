@@ -32,16 +32,3 @@
         istio_revision: "{{ istio_clusters[istio_cluster].version | kameshsampath.kubernetes_spices.version_to_revision }}"
       when: istio_clusters[istio_cluster].install
 
-    - name: "Deploy Cross Network Gateway"
-      kubernetes.core.k8s:
-        context: "{{ istio_clusters[istio_cluster].k8s_context }}"
-        state: present
-        namespace: istio-gateways
-        template:
-          - path: "{{ istiod_templates_dir + 'cross-network-gateway.yaml.j2'}}"
-          - path: "{{ istiod_templates_dir + 'istiod-gateway.yaml.j2'}}"
-          - path: "{{ istiod_templates_dir + 'istiod-vs.yaml.j2'}}"
-      vars:
-        istio_version: "{{ istio_clusters[istio_cluster].version }}"
-        istio_revision: "{{ istio_clusters[istio_cluster].version | kameshsampath.kubernetes_spices.version_to_revision }}"
-      when: istio_clusters[istio_cluster].install

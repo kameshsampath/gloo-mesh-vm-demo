@@ -2,8 +2,6 @@
 set -e
 set -o pipefail
 
-echo "Jai Guru"
-
 printenv
 
 cd "$HOME"
