@@ -17,8 +17,8 @@ for detailed DIY guide.
 ## Download Sources
 
 ```shell
-  git clone https://github.com/kameshsampath/gloo-mesh-vm-demo
-  cd gloo-mesh-vm-demo
+git clone https://github.com/kameshsampath/gloo-mesh-vm-demo
+cd gloo-mesh-vm-demo
 ```
 
 ## Demo Architecture
@@ -29,6 +29,14 @@ for detailed DIY guide.
 
 ```shell
 direnv allow .
+```
+
+## Setup Ansible Environment
+
+The demo will be using [Ansible](https://docs.ansible.com/){target=_blank} to setup the environment, run the following command to install Ansible modules and extra collections and roles the will be used by various tasks.
+
+```shell
+make setup-ansible
 ```
 
 ## Create Virtual Machines
@@ -69,60 +77,91 @@ make deploy-gloo
 make deploy-istio
 ```
 
-## Deploy Demo Applictions
+## Deploy Demo Applications
 
-Deploy the httpbin and a sleep pod,
+```shell
+helm repo add istio-demo-apps https://github.com/kameshsampath/istio-demo-apps
+helm repo update
+```
 
 ```shell
 kubectl label ns default istio.io/rev=1-11-5
-kubectl apply -k $DEMO_HOME/apps
 ```
 
-### Deploy Istio Sidecar Virtual Machine
+Deploy Customer,
+
+```shell
+helm install --kube-context="$CLUSTER1" \
+  customer istio-demo-apps/customer \
+  --set enableIstioGateway="true"
+```
+
+Deploy Preference,
+
+```shell
+helm install --kube-context="$CLUSTER1" \
+  customer istio-demo-apps/preference 
+```
+
+Call the service to test,
+
+```bash
+export INGRESS_GATEWAY_IP=$(kubectl --context ${CLUSTER1} -n istio-gateways get svc ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].*}')
+export SVC_URL="${INGRESS_GATEWAY_IP}/customer"
+```
+
+```shell
+curl $SVC_URL
+```
+
+The command should shown an output like,
+
+```text
+customer => preference => Service host 'http://recommendation:8080' not known.%
+```
+
+## Deploy Istio Sidecar Virtual Machine
 
 Install some essential packages on the vms,
 
 ```shell
-make deploy-base deploy-base
+make deploy-base
 ```
 
-Deploy the workload,
+Deploy the workload the `recommendation` service,
 
 ```shell
-make deploy-base deploy-workload
+make deploy-workload
 ```
 
-### Calling Services
+## Calling Services
 
-#### From VM to Kubernetes
+### From VM to Kubernetes
 
 ```shell
-multipass exec vm1  -- curl -I httpbin.default.svc.cluster.local:8000/status/200
+multipass exec vm1 -- curl customer.default.svc.cluster.local:8080
 ```
 
-You should get response like,
+The command should shown an output like,
+
+```text
+customer => preference => recommendation v1 from 'vm1': 1
+```
+
+### From Kubernetes to VM
 
 ```shell
-HTTP/1.1 200 OK
-server: envoy
-date: Mon, 10 Jan 2022 07:19:24 GMT
-content-type: text/html; charset=utf-8
-access-control-allow-origin: *
-access-control-allow-credentials: true
-content-length: 0
-x-envoy-upstream-service-time: 3
+curl $SVC_URL
 ```
 
-#### From Kubernetes to VM
+The command should shown an output like,
+
+```text
+customer => preference => recommendation v1 from 'vm1': 2
+```
+
+## Cleanup
 
 ```shell
-export SLEEP_POD=$(kubectl --context=cluster1 get pods -lapp=sleep -oname)
-kubectl exec $SLEEP_POD -- curl -s vm-demos-app.vm-demos.svc.cluster.local:8080
+make clean-up
 ```
-
-You should get response like,
-
-```shell
-recommendation v1 from 'vm1': 1
-```
-

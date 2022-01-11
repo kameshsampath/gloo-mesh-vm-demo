@@ -6,9 +6,11 @@ export KUBECTL_VERSION={{ kubernetes_cli_version }}
 
 export GLOO_MESH_LICENSE_KEY="$GLOO_MESH_GATEWAY_LICENSE_KEY"
 
-export ISTIO_HOME=$(asdf where istio)
-export ISTIO_VERSION=$(istioctl version --remote=false -o json | jq -r  '.clientVersion.version' -)
+# can override this with $DEMO_HOME/.envrc.local file
+
+export ISTIO_VERSION=1.11.5
 export ISTIO_REVISION="${ISTIO_VERSION//\./-}"
+export ISTIO_HOME="${DEMO_WORK_DIR}/${ISTIO_REVISION}/istio-${ISTIO_VERSION}"
 
 PATH_add "$ISTIO_HOME/bin"
 
