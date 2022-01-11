@@ -48,7 +48,7 @@ For more information on how to calculate the number of pods and service per CIDR
 
 ### Create Kubernetes Cluster
 
-The following command will create kubernetes(k3s) cluster and configure it with [Calico](https://projectcalico.docs.tigera.io) plugin. 
+The following command will create kubernetes(k3s) cluster and configure it with [Calico](https://projectcalico.docs.tigera.io) plugin.
 
 ```shell
 make create-kubernetes-clusters

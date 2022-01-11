@@ -363,4 +363,3 @@
     - /var/run/secrets
   loop_control:
     label: "{{ item }}"
-

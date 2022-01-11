@@ -1,0 +1,38 @@
+apiVersion: networking.mesh.gloo.solo.io/v1
+kind: TrafficPolicy
+metadata:
+  namespace: gloo-mesh
+  name: blue-green-canary
+spec:
+  sourceSelector:
+  - kubeWorkloadMatcher:
+      namespaces:
+      - blue-green-canary
+      - vm-blue-green-canary
+  destinationSelector:
+  - kubeServiceRefs:
+      services:
+        - clusterName: cluster1
+          name: blue-green-canary
+          namespace: blue-green-canary
+  httpRequestMatchers:
+    - headers:
+        - name: user-agent
+          regex: .*Mobile.*
+  routeSelector:
+  - virtualHostSelector:
+     namespaces:
+     - "gloo-mesh"
+  - routeTableSelector:
+     namespaces:
+     - "gloo-mesh"
+  policy:
+    trafficShift:
+      destinations:
+        - kubeService:
+            clusterName: cluster1
+            name: blue-green-canary
+            namespace: vm-blue-green-canary
+            subset:
+              version: blue
+          weight: 100

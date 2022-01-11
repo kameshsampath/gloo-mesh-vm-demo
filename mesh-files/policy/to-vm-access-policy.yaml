@@ -1,0 +1,21 @@
+apiVersion: networking.mesh.gloo.solo.io/v1
+kind: AccessPolicy
+metadata:
+  name: to-vm
+  namespace: gloo-mesh
+spec:
+  sourceSelector:
+  - kubeServiceAccountRefs:
+      serviceAccounts:
+        - name: istio-ingressgateway-service-account
+          namespace: istio-system
+          clusterName: cluster1
+        - name: istio-ingressgateway-service-account
+          namespace: istio-system
+          clusterName: cluster2
+  destinationSelector:
+   - kubeServiceRefs:
+      services:
+       - name: blue-green-canary
+         namespace: vm-blue-green-canary
+         clusterName: cluster1

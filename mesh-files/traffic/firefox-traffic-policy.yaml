@@ -1,0 +1,34 @@
+apiVersion: networking.mesh.gloo.solo.io/v1
+kind: TrafficPolicy
+metadata:
+  namespace: gloo-mesh
+  name: blue-green-canary
+spec:
+  destinationSelector:
+  - kubeServiceRefs:
+      services:
+        - clusterName: cluster1
+          name: blue-green-canary
+          namespace: blue-green-canary
+  httpRequestMatchers:
+    - headers:
+        - name: user-agent
+          regex: true
+          value: ".*Firefox.*"
+  routeSelector:
+  - virtualHostSelector:
+     namespaces:
+     - "gloo-mesh"
+  - routeTableSelector:
+     namespaces:
+     - "gloo-mesh"
+  policy:
+    trafficShift:
+      destinations:
+        - kubeService:
+            clusterName: cluster2
+            name: blue-green-canary
+            namespace: blue-green-canary
+            subset:
+              version: green
+          weight: 100

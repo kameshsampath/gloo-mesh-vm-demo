@@ -50,8 +50,8 @@ istio_clusters:
      version: "{{ lookup('env','ISTIO_VERSION') }}"
      install: yes
 istio_enabled: yes
-istio_vm_app: vm-demos-app
-istio_vm_namespace: vm-demos
+istio_vm_app: recommendation
+istio_vm_namespace: default
 istio_vm_workdir: "/home/{{ ansible_user }}/istio-vm/files"
 istio_vm_service_account: vm-service-account
 istio_cluster_network: network1

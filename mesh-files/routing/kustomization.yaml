@@ -1,0 +1,7 @@
+namespace: gloo-mesh
+
+
+resources:
+  - bgc-virtual-gateway.yaml
+  - bgc-virtual-host.yaml
+  - bgc-route-table.yaml

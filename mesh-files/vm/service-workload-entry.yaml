@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blue-green-canary
+  namespace: vm-blue-green-canary
+  labels:
+    app: blue-green-canary
+spec:
+  ports:
+  - port: 8080
+    name: http
+    targetPort: 8080
+  selector:
+    app: blue-green-canary
+---
+apiVersion: networking.istio.io/v1beta1
+kind: WorkloadEntry
+metadata:
+  name: blue-green-canary
+  namespace: vm-blue-green-canary
+spec:
+  network: bgc-network1
+  address: 192.168.68.114
+  labels:
+    app: blue-green-canary
+    version: canary
+  serviceAccount: vm-blue-green-canary

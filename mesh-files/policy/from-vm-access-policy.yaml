@@ -1,0 +1,21 @@
+apiVersion: networking.mesh.gloo.solo.io/v1
+kind: AccessPolicy
+metadata:
+  name: from-vm
+  namespace: gloo-mesh
+spec:
+  sourceSelector:
+  - kubeServiceAccountRefs:
+      serviceAccounts:
+        - name: vm-blue-green-canary
+          namespace: vm-blue-green-canary
+          clusterName: cluster1
+  destinationSelector:
+  - kubeServiceMatcher:
+      namespaces:
+      - blue-green-canary
+      - vm-blue-green-canary
+      - default
+      clusters:
+        - cluster1
+        - cluster2

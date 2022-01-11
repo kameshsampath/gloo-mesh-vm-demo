@@ -1,0 +1,38 @@
+---
+apiVersion: discovery.mesh.gloo.solo.io/v1
+kind: Workload
+metadata:
+  name: blue-green-canary-vm-blue-green-canary-cluster1
+  namespace: gloo-mesh
+spec:
+  kubernetes:
+    controller:
+      clusterName: cluster1
+      name: blue-green-canary
+      namespace: vm-blue-green-canary
+    podLabels:
+      app: blue-green-canary
+    serviceAccountName: vm-blue-green-canary
+  mesh:
+    name: istiod-istio-system-cluster1
+    namespace: gloo-mesh
+---
+apiVersion: discovery.mesh.gloo.solo.io/v1
+kind: Destination
+metadata:
+  name: blue-green-canary-vm-blue-green-canary-cluster1
+  namespace: gloo-mesh
+spec:
+  kubeService:
+    labels:
+      app: blue-green-canary
+    ref:
+      clusterName: cluster1
+      name: blue-green-canary
+      namespace: vm-blue-green-canary
+    workloadSelectorLabels:
+      app: blue-green-canary
+      version: canary
+  mesh:
+    name: istiod-istio-system-cluster1
+    namespace: gloo-mesh

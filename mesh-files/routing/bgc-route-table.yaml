@@ -1,0 +1,21 @@
+apiVersion: networking.enterprise.mesh.gloo.solo.io/v1beta1
+kind: RouteTable
+metadata:
+  name: blue-green-canary
+  namespace: gloo-mesh
+spec:
+  routes:
+  - matchers:
+    - uri:
+      # TODO
+      #  prefix: /bgc
+        prefix: /
+    name: blue-green-canary
+    routeAction:
+      # TODO
+      # pathRewrite: /
+      destinations:
+      - kubeService:
+          clusterName: cluster1
+          name: blue-green-canary
+          namespace: blue-green-canary
