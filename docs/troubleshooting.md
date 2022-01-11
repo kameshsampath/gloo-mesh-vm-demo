@@ -35,3 +35,5 @@ Restart Istio and Gateway deployments
 kubectl --context=$CLUSTER1 rollout restart -n istio-system deployment istiod-1-11-5
 kubectl --context=$CLUSTER1  rollout restart -n istio-gateways deployment ingressgateway
 ```
+
+---8<--- "includes/abbreviations.md"

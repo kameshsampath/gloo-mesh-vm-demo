@@ -20,11 +20,11 @@ nav:
   - 'Deploy applications on Kubernetes': "deploy_apps_on_k8s.md"
   - 'Deploy application on VM': "deploy_apps_on_vm.md"
   - "Appendix":
-    - 'Troubleshooting': "troubleshooting.md"
     - 'Ansible Roles':
         - 'Multipass': "role_multipass.md"
         - 'k3s': "role_k3s.md"
         - 'Workload VM': "role_workload_vm.md"
+    - 'Troubleshooting': "troubleshooting.md"
   
 markdown_extensions:
   - toc:

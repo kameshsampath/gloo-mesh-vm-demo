@@ -2,6 +2,4 @@
 k3s_version: v1.21.8+k3s1
 ansible_user: ubuntu
 systemd_dir: /etc/systemd/system
-# don't deploy Traefik and use 644 dev mode for kubeconfig
-extra_server_args: "--write-kubeconfig-mode 644 --no-deploy traefik"
 extra_agent_args: 

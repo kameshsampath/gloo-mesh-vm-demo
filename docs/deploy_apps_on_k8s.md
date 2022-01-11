@@ -129,4 +129,4 @@ customer => preference => Service host 'http://recommendation:8080' not known.%
 
 Excellent! We not got our Kubernetes services ready. In next chapter lets deploy the `recommendation` service and make services to work together.
 
----8<--- "includes/abbrevations.md"
+---8<--- "includes/abbreviations.md"

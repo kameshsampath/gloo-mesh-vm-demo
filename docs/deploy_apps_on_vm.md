@@ -110,6 +110,6 @@ customer => preference => recommendation v1 from 'vm1': 2
 
 In next chapter we will see how to apply various Service Mesh features like Rate Limit, Access Policies etc., using Gloo Mesh.
 
----8<--- "includes/abbrevations.md"
+---8<--- "includes/abbreviations.md"
 
 [^1]: https://istio.io/v1.11/docs/setup/install/virtual-machine

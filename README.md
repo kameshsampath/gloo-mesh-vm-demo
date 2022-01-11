@@ -3,7 +3,7 @@
 A simple microservices demo to show how to onboard VM workloads with Istio and make them work with Kubernetes services. The demo also shows how to use [Gloo Mesh](https://solo.io/products/gloo-mesh) to add features like Traffic Policy, Access Policy etc., that spans across Kubernetes and VM workloads.
 
 Checkout the [HTML Documentation](https://kameshsampath.github.io/gloo-mesh-vm-demo/)
-for detailed DIY guide.
+for a detailed DIY guide.
 
 ## Tools
 

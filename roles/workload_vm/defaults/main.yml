@@ -1,11 +1,11 @@
 workload_istio_ns: istio-system
-workload_istio_gateway_ns: istio-system
-workload_istio_svc_name: istio-ingressgateway
+workload_istio_gateway_ns: istio-gateways
+workload_istio_svc_name: ingressgateway
 istiod_nodeport_query: 'spec.ports[?name == `tcp-istiod` ].nodePort'
 semver_regexp: '^(?P<major>\d+)\.(?P<minor>\d+).(?P<micro>\d+)-*(?P<patch>\w*)$'
 
 force_app_install: no
-use_nodeport: false
+use_nodeport: no
 
 # Istio 
 istio_enabled: yes

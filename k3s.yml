@@ -3,9 +3,6 @@
   become: yes
   vars_files:
     - vars.yml
-  vars:
-    k3s_deploy_calico_network_plugin: yes
-    extra_server_args: "--flannel-backend=none --cluster-cidr={{ k3s_cluster_cidr }} --service-cidr={{ k3s_service_cidr}} --disable-network-policy --disable=traefik"
   roles:
     - role: k3s
   tasks:

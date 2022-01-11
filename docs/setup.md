@@ -65,7 +65,7 @@ force_app_install| Clean install the VM application | no | [Workload](./role_wor
 
 Apart from the variables defined, there are three other variables that controls the setup,
 
-- `multipass_vms` - defines a dictionary of VMs that needs to be created,
+- `multipass_vms` - defines a dictionary of VMs that needs to be created.  For more details check the [multipass role](role_multipass.md)
 
 ```yaml
 multipass_vms:
@@ -237,11 +237,14 @@ Management Configuration
 
 ## Setup Istio
 
-Lets now complete the environment setup part by deploying [Istio](https://istio.io) on to `cluster1`. We use Istio `1.11.5` for this tutorial,
+Lets now complete the environment setup part by deploying [Istio](https://istio.io) on to `cluster1`. We use Istio `1.11.5` for this tutorial but any version greater than `1.11.x` should work.
 
 ```shell
 make deploy-istio
 ```
+
+!!! important
+    The Istio setup for this demo uses revisioned Control Plane deployment.
 
 Lets check if Istio setup is done correctly,
 
@@ -260,4 +263,4 @@ Checked 1 Istio Deployments
 
 [^1]: https://cloud.google.com/kubernetes-engine/docs/concepts/alias-ips
 
----8<--- "includes/abbrevations.md"
+---8<--- "includes/abbreviations.md"

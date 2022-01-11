@@ -16,4 +16,4 @@ In this demo I extend that technique to [Isito](https://istio.io) and explore ho
   <figcaption>Demo Architecture</figcaption>
 </figure>
 
----8<--- "includes/abbrevations.md"
+---8<--- "includes/abbreviations.md"
