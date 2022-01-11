@@ -625,13 +625,188 @@
 </thead>
 <tbody>
 <tr>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
+<td align="left">work_dir</td>
+<td align="left">The work directory on the local machine</td>
+<td align="left"><code>{{ playbook_dir }}/work</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">kubeconfig_dir</td>
+<td align="left">The directory to save all the kubeconfig files</td>
+<td align="left"><code>{{ work_dir }}/.kube</code></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">kubernetes_cli_version</td>
+<td align="left">the kubectl version</td>
+<td align="left">v1.21.8</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">k3s_cluster_cidr</td>
+<td align="left">The Cluster CIDR(<code>cluster-cidr</code>) for Kubernetes Clusters</td>
+<td align="left">172.16.0.0/24</td>
+<td align="left"><a href="../role_k3s/">k3s</a></td>
+</tr>
+<tr>
+<td align="left">k3s_service_cidr</td>
+<td align="left">The Service CIDR(service-cidr) for Kubernetes Clusters</td>
+<td align="left">172.18.0.0/20</td>
+<td align="left"><a href="../role_k3s/">k3s</a></td>
+</tr>
+<tr>
+<td align="left">istio_enabled</td>
+<td align="left">Whether to configure the vms with Istio Sidecar</td>
+<td align="left">yes</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_vm_app</td>
+<td align="left"><abbr title="Virtual Machine">VM</abbr> application name</td>
+<td align="left">recommendation</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_vm_namespace</td>
+<td align="left">The namespace in Kubernetes cluster i.e. <code>cluster1</code></td>
+<td align="left">default</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_vm_workdir</td>
+<td align="left">The work dir in vm where the Istio Sidecar files will be created</td>
+<td align="left"><code>/home/{{ ansible_user }}/istio-vm/files</code></td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_vm_service_account</td>
+<td align="left">The Kubernetes Service Account to use when creating <abbr title="Virtual Machine">VM</abbr> resources in Kubernetes</td>
+<td align="left">vm-service-account</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_cluster_network</td>
+<td align="left">The Istio Cluster Network the network</td>
+<td align="left">network1</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_vm_network</td>
+<td align="left">The Istio network for <abbr title="Virtual Machine">VM</abbr> communication</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">istio_cluster</td>
+<td align="left">The Istio cluster name. The name in this demo maps to Kubernetes cluster context where to install Istio i.e <code>cluster1</code> and the same is used as SPIFEE trustDomain</td>
+<td align="left">cluster1</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_cluster_service_ip_cidr</td>
+<td align="left">The Cluster Service IP CIDR to use with <code>istio_cluster</code></td>
+<td align="left"><code>{{ k3s_service_cidr }}</code></td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">istio_cluster_pod_ip_cidr</td>
+<td align="left">The Cluster IP CIDR to use with <code>istio_cluster</code></td>
+<td align="left"><code>{{ k3s_cluster_cidr }}</code></td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">workload_istio_ns</td>
+<td align="left">The namespace where Istio Control Plane is deployed in <code>istio_cluster</code></td>
+<td align="left"><code>{{ k3s_cluster_cidr }}</code></td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">workload_istio_gateway_ns</td>
+<td align="left">The namespace where Istio Ingress gateway is deployed in <code>istio_cluster</code></td>
+<td align="left"><code>{{ k3s_cluster_cidr }}</code></td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">clean_istio_vm_files</td>
+<td align="left">Clean the generated Istio sidecar <abbr title="Virtual Machine">VM</abbr> files including the directories where it was copied in the <abbr title="Virtual Machine">VM</abbr></td>
+<td align="left">yes</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
+</tr>
+<tr>
+<td align="left">force_app_install</td>
+<td align="left">Clean install the <abbr title="Virtual Machine">VM</abbr> application</td>
+<td align="left">no</td>
+<td align="left"><a href="../role_workload_vm/">Workload</a></td>
 </tr>
 </tbody>
 </table>
+<p>Apart from the variables defined, there are three other variables that controls the setup,</p>
+<ul>
+<li><code>multipass_vms</code> - defines a dictionary of VMs that needs to be created,</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">multipass_vms</span><span class="p">:</span><span class="w"></span>
+<span class="w"> </span><span class="c1"># the name of the VM</span><span class="w"></span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mgmt</span><span class="w"></span>
+<span class="w">   </span><span class="c1"># cpus to allocate</span><span class="w"></span>
+<span class="w">   </span><span class="nt">cpus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w"></span>
+<span class="w">   </span><span class="c1"># memory to allocate</span><span class="w"></span>
+<span class="w">   </span><span class="nt">mem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8g</span><span class="w"></span>
+<span class="w">   </span><span class="c1"># disk size</span><span class="w"></span>
+<span class="w">   </span><span class="nt">disk</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30g</span><span class="w"></span>
+<span class="w">   </span><span class="c1"># roles of this vm</span><span class="w"></span>
+<span class="w">   </span><span class="nt">role</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gloo</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">management</span><span class="w"></span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster1</span><span class="w"></span>
+<span class="w">   </span><span class="nt">cpus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w"></span>
+<span class="w">   </span><span class="nt">mem</span><span class="p">:</span><span class="w">  </span><span class="l l-Scalar l-Scalar-Plain">8g</span><span class="w"></span>
+<span class="w">   </span><span class="nt">disk</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30g</span><span class="w"></span>
+<span class="w">   </span><span class="nt">role</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gloo</span><span class="w"></span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workload</span><span class="w"></span>
+<span class="w"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vm1</span><span class="w"></span>
+<span class="w">   </span><span class="nt">cpus</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span><span class="w"></span>
+<span class="w">   </span><span class="nt">mem</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2g</span><span class="w"></span>
+<span class="w">   </span><span class="nt">disk</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30g</span><span class="w"></span>
+<span class="w">   </span><span class="nt">role</span><span class="p">:</span><span class="w"></span>
+<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vm</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li><code>gloo_clusters</code> - the Kubernetes clusters that wil be used for gloo deployment</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">gloo_clusters</span><span class="p">:</span><span class="w"></span>
+<span class="w">  </span><span class="c1"># name of the cluster</span><span class="w"></span>
+<span class="w">  </span><span class="nt">mgmt</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># cloud where its deployed</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cloud</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k3s</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># the Kubernetes Context name, recommended it to be the name of VM where k3s runs</span><span class="w"></span>
+<span class="w">    </span><span class="nt">k8s_context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mgmt</span><span class="w"></span>
+<span class="w">    </span><span class="c1"># logical cluster name to be used while registering it with meshctl</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cluster_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">mgmt</span><span class="w"></span>
+<span class="w">  </span><span class="nt">cluster1</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cloud</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k3s</span><span class="w"></span>
+<span class="w">    </span><span class="nt">k8s_context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster1</span><span class="w"></span>
+<span class="w">    </span><span class="nt">cluster_name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cluster1</span><span class="w"></span>
+</code></pre></div>
+<ul>
+<li><code>istio_clusters</code> - the Kubernetes clusters where Istio will be deployed</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="nt">istio_clusters</span><span class="p">:</span><span class="w"></span>
+<span class="w">   </span><span class="c1"># name of the cluster</span><span class="w"></span>
+<span class="w">   </span><span class="nt">cluster1</span><span class="p">:</span><span class="w"></span>
+<span class="w">     </span><span class="c1"># Kubernetes Context to use for this cluster</span><span class="w"></span>
+<span class="w">     </span><span class="nt">k8s_context</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">gloo_clusters.cluster1.k8s_context</span><span class="nv"> </span><span class="s">}}&quot;</span><span class="w"></span>
+<span class="w">     </span><span class="c1"># The version of Istio that needs to be deployed</span><span class="w"></span>
+<span class="w">     </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">lookup(&#39;env&#39;,&#39;ISTIO_VERSION&#39;)</span><span class="nv"> </span><span class="s">}}&quot;</span><span class="w"></span>
+<span class="w">     </span><span class="nt">install</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">yes</span><span class="w"></span>
+</code></pre></div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The demo uses <a href="https://asdf-vm">asdf-vm</a> to handle multiple versions of a software e.g. Python, Istio. Check out <a href="https://github.com/kameshsampath/asdf-istio">https://github.com/kameshsampath/asdf-istio</a></p>
+</div>
+<p>The setup uses direnv and the playbooks generates the .envrc using template form <code>$DEMO_HOME/templates/.envrc</code>. If needed adjust the .envrc template and rerun the create-vms and create-kubernetes-clusters task to refresh or update it.</p>
 <h2 id="create-virtual-machines">Create Virtual Machines<a class="headerlink" href="#create-virtual-machines" title="Permanent link">&para;</a></h2>
 <p>For the demo we will be using <a href="https://multipass.run" target="_blank">multipass</a> to create and run virtual machines. Run the following command to create the virtual machines,</p>
 <div class="highlight"><pre><span></span><code>make create-vms
@@ -659,6 +834,7 @@ Disk usage:     5.3G out of 28.9G
 Memory usage:   1.8G out of 7.8G
 Mounts:         --
 </code></pre></div>
+<p>The task finally generates Ansible Hosts inventory based on the template from <code>$DEMO_HOME/templates/hosts.j2</code>, which will be used as inventory in other playbook runs.</p>
 <h2 id="setup-kubernetes-clusters">Setup Kubernetes Clusters<a class="headerlink" href="#setup-kubernetes-clusters" title="Permanent link">&para;</a></h2>
 <p>As part of this demo we will be setting up <a href="https://k3s.io">k3s</a> Kubernetes clusters. The k3s clusters will be a single node cluster run via multipass <abbr title="Virtual Machine">VM</abbr>. We will configure that to with the following flags,</p>
 <ul>
@@ -680,8 +856,7 @@ Mounts:         --
 <p>The k3s deployment as part of this demo will be using <a href="https://projectcalico.docs.tigera.io" target="_blank">Calico</a> which enables us to define routes to the Kubernetes services/pods via its <a href="https://projectcalico.docs.tigera.io/networking/openstack/host-routes" target="_blank">host</a>.</p>
 </div>
 <h2 id="setup-gloo">Setup Gloo<a class="headerlink" href="#setup-gloo" title="Permanent link">&para;</a></h2>
-<p>Let us setup on the <code>mgmt</code> cluster. The setup uses the Gloo Enterprise License, if you don&rsquo;t have one please request 30 day trial one via <a href="https://solo.io" target="_blank">solo.io</a>. Set the License key via as <code>$GLOO_MESH_GATEWAY_LICENSE_KEY</code> environment variable.</p>
-<p>Run the following command to deploy Gloo Mesh,</p>
+<p>Let us setup on the <code>mgmt</code> cluster. The setup uses the Gloo Enterprise License, if you don&rsquo;t have one please request 30 day trial one via <a href="https://solo.io" target="_blank">solo.io</a>. Set the License key via as <code>$GLOO_MESH_GATEWAY_LICENSE_KEY</code> environment variable and then run the following command to deploy Gloo Mesh,</p>
 <div class="highlight"><pre><span></span><code>make deploy-gloo
 </code></pre></div>
 <p>Ensure Gloo mesh is setup correctly,</p>
