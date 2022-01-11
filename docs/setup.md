@@ -43,7 +43,96 @@ make setup-ansible
 
 | Variable | Description                        | Default Value | Ansible Role
 | :------- | :----------------------------------| :------------ | :------------
+work_dir| The work directory on the local machine | `{{ playbook_dir }}/work`
+kubeconfig_dir| The directory to save all the kubeconfig files | `{{ work_dir }}/.kube`
+kubernetes_cli_version | the kubectl version | v1.21.8
+k3s_cluster_cidr | The Cluster CIDR(`cluster-cidr`) for Kubernetes Clusters | 172.16.0.0/24 | [k3s](./role_k3s.md)
+k3s_service_cidr | The Service CIDR(service-cidr) for Kubernetes Clusters | 172.18.0.0/20 | [k3s](./role_k3s.md)
+istio_enabled| Whether to configure the vms with Istio Sidecar | yes | [Workload](./role_workload_vm.md)
+istio_vm_app| VM application name | recommendation | [Workload](./role_workload_vm.md)
+istio_vm_namespace| The namespace in Kubernetes cluster i.e. `cluster1` | default | [Workload](./role_workload_vm.md)
+istio_vm_workdir| The work dir in vm where the Istio Sidecar files will be created | `/home/{{ ansible_user }}/istio-vm/files` | [Workload](./role_workload_vm.md)
+istio_vm_service_account| The Kubernetes Service Account to use when creating VM resources in Kubernetes | vm-service-account | [Workload](./role_workload_vm.md)
+istio_cluster_network| The Istio Cluster Network the network | network1 | [Workload](./role_workload_vm.md)
+istio_vm_network| The Istio network for VM communication | [Workload](./role_workload_vm.md)
+istio_cluster| The Istio cluster name. The name in this demo maps to Kubernetes cluster context where to install Istio i.e `cluster1` and the same is used as SPIFEE trustDomain | cluster1 | [Workload](./role_workload_vm.md)
+istio_cluster_service_ip_cidr| The Cluster Service IP CIDR to use with `istio_cluster` | `{{ k3s_service_cidr }}` | [Workload](./role_workload_vm.md)
+istio_cluster_pod_ip_cidr| The Cluster IP CIDR to use with `istio_cluster` | `{{ k3s_cluster_cidr }}` | [Workload](./role_workload_vm.md)
+workload_istio_ns| The namespace where Istio Control Plane is deployed in `istio_cluster` | `{{ k3s_cluster_cidr }}` | [Workload](./role_workload_vm.md)
+workload_istio_gateway_ns| The namespace where Istio Ingress gateway is deployed in `istio_cluster` | `{{ k3s_cluster_cidr }}` | [Workload](./role_workload_vm.md)
+clean_istio_vm_files| Clean the generated Istio sidecar VM files including the directories where it was copied in the VM| yes | [Workload](./role_workload_vm.md)
+force_app_install| Clean install the VM application | no | [Workload](./role_workload_vm.md)
 
+Apart from the variables defined, there are three other variables that controls the setup,
+
+- `multipass_vms` - defines a dictionary of VMs that needs to be created,
+
+```yaml
+multipass_vms:
+ # the name of the VM
+ - name: mgmt
+   # cpus to allocate
+   cpus: 4
+   # memory to allocate
+   mem: 8g
+   # disk size
+   disk: 30g
+   # roles of this vm
+   role:
+    - kubernetes
+    - gloo
+    - management
+ - name: cluster1
+   cpus: 4
+   mem:  8g
+   disk: 30g
+   role:
+    - kubernetes
+    - gloo
+    - workload
+ - name: vm1
+   cpus: 2
+   mem: 2g
+   disk: 30g
+   role:
+     - vm
+```
+
+- `gloo_clusters` - the Kubernetes clusters that wil be used for gloo deployment
+
+```yaml
+gloo_clusters:
+  # name of the cluster
+  mgmt:
+    # cloud where its deployed
+    cloud: k3s
+    # the Kubernetes Context name, recommended it to be the name of VM where k3s runs
+    k8s_context: mgmt
+    # logical cluster name to be used while registering it with meshctl
+    cluster_name: mgmt
+  cluster1:
+    cloud: k3s
+    k8s_context: cluster1
+    cluster_name: cluster1
+```
+
+- `istio_clusters` - the Kubernetes clusters where Istio will be deployed
+
+```yaml
+istio_clusters:
+   # name of the cluster
+   cluster1:
+     # Kubernetes Context to use for this cluster
+     k8s_context: "{{ gloo_clusters.cluster1.k8s_context }}"
+     # The version of Istio that needs to be deployed
+     version: "{{ lookup('env','ISTIO_VERSION') }}"
+     install: yes
+```
+
+!!! tip
+    The demo uses [asdf-vm](https://asdf-vm) to handle multiple versions of a software e.g. Python, Istio. Check out <https://github.com/kameshsampath/asdf-istio>
+
+The setup uses direnv and the playbooks generates the .envrc using template form `$DEMO_HOME/templates/.envrc`. If needed adjust the .envrc template and rerun the create-vms and create-kubernetes-clusters task to refresh or update it.
 
 ## Create Virtual Machines
 
@@ -82,6 +171,8 @@ Memory usage:   1.8G out of 7.8G
 Mounts:         --
 ```
 
+The task finally generates Ansible Hosts inventory based on the template from `$DEMO_HOME/templates/hosts.j2`, which will be used as inventory in other playbook runs.
+
 ## Setup Kubernetes Clusters
 
 As part of this demo we will be setting up [k3s](https://k3s.io) Kubernetes clusters. The k3s clusters will be a single node cluster run via multipass VM. We will configure that to with the following flags,
@@ -111,9 +202,7 @@ CURRENT   NAME       CLUSTER    AUTHINFO   NAMESPACE
 
 ## Setup Gloo
 
-Let us setup on the `mgmt` cluster. The setup uses the Gloo Enterprise License, if you don't have one please request 30 day trial one via [solo.io](https://solo.io){target=_blank}. Set the License key via as `$GLOO_MESH_GATEWAY_LICENSE_KEY` environment variable.
-
-Run the following command to deploy Gloo Mesh,
+Let us setup on the `mgmt` cluster. The setup uses the Gloo Enterprise License, if you don't have one please request 30 day trial one via [solo.io](https://solo.io){target=_blank}. Set the License key via as `$GLOO_MESH_GATEWAY_LICENSE_KEY` environment variable and then run the following command to deploy Gloo Mesh,
 
 ```shell
 make deploy-gloo

@@ -1,5 +1,5 @@
 work_dir: "{{ playbook_dir }}/work"
-kubeconfig_dir: "{{ playbook_dir }}/work/.kube"
+kubeconfig_dir: "{{ work_dir }}/.kube"
 
 #Kubernetes
 kubernetes_cli_version: v1.21.8
@@ -66,4 +66,3 @@ workload_istio_gateway_ns: istio-gateways
 workload_istio_svc_name: ingressgateway
 clean_istio_vm_files: yes
 force_app_install: no
-use_nodeport: false
