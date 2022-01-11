@@ -1,0 +1,802 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://kameshsampath.github.com/gloo-mesh-vm-demo/setup/">
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.6">
+    
+    
+      
+        <title>Setup - Gloo Mesh VM Demo</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.cd566b2a.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.e6a45f82.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Red+Hat+Display:300,400,400i,700%7C&display=fallback">
+        <style>:root{--md-text-font:"Red Hat Display";--md-code-font:""}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#download-tools" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="Gloo Mesh VM Demo" class="md-header__button md-logo" aria-label="Gloo Mesh VM Demo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Gloo Mesh VM Demo
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Setup
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="Gloo Mesh VM Demo" class="md-nav__button md-logo" aria-label="Gloo Mesh VM Demo" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    Gloo Mesh VM Demo
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Setup
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Setup
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#download-sources" class="md-nav__link">
+    Download Sources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ensure-environment" class="md-nav__link">
+    Ensure Environment
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-ansible-environment" class="md-nav__link">
+    Setup Ansible Environment
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ansible-variables" class="md-nav__link">
+    Ansible Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-virtual-machines" class="md-nav__link">
+    Create Virtual Machines
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-kubernetes-clusters" class="md-nav__link">
+    Setup Kubernetes Clusters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-gloo" class="md-nav__link">
+    Setup Gloo
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-istio" class="md-nav__link">
+    Setup Istio
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_apps_on_k8s/" class="md-nav__link">
+        Deploy applications on Kubernetes
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../deploy_apps_on_vm/" class="md-nav__link">
+        Deploy application on VM
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5" type="checkbox" id="__nav_5" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5">
+          Appendix
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Appendix" data-md-level="1">
+        <label class="md-nav__title" for="__nav_5">
+          <span class="md-nav__icon md-icon"></span>
+          Appendix
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_5_2">
+          Ansible Roles
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Ansible Roles" data-md-level="2">
+        <label class="md-nav__title" for="__nav_5_2">
+          <span class="md-nav__icon md-icon"></span>
+          Ansible Roles
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../role_multipass/" class="md-nav__link">
+        Multipass
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../role_k3s/" class="md-nav__link">
+        k3s
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../role_workload_vm/" class="md-nav__link">
+        Workload VM
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#download-sources" class="md-nav__link">
+    Download Sources
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ensure-environment" class="md-nav__link">
+    Ensure Environment
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-ansible-environment" class="md-nav__link">
+    Setup Ansible Environment
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ansible-variables" class="md-nav__link">
+    Ansible Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create-virtual-machines" class="md-nav__link">
+    Create Virtual Machines
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-kubernetes-clusters" class="md-nav__link">
+    Setup Kubernetes Clusters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-gloo" class="md-nav__link">
+    Setup Gloo
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#setup-istio" class="md-nav__link">
+    Setup Istio
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+
+<p>At the end of this chapter you would have setup the environment and tools that are required for the demo.</p>
+<h1 id="download-tools">Download Tools<a class="headerlink" href="#download-tools" title="Permanent link">&para;</a></h1>
+<p>We will be using the following tools as part of the tutorial. Please have them installed and configured before proceeding further.</p>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>macos</th>
+<th>linux</th>
+<th>windows</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://direnv.net" target="_blank">direnv</a></td>
+<td><code>brew install direnv</code></td>
+<td><a href="https://direnv.net" target="_blank">Install</a></td>
+<td>N.A</td>
+</tr>
+<tr>
+<td><a href="https://helm.sh" target="_blank">helm</a></td>
+<td><code>brew install helm</code></td>
+<td><a href="https://helm.sh/docs/intro/install/" target="_blank">Package Managers</a></td>
+<td><code>choco install kubernetes-helm</code></td>
+</tr>
+<tr>
+<td><a href="https://multipass.run/" target="_blank">multipass</a></td>
+<td><code>brew install multipass</code></td>
+<td><a href="https://multipass.run/" target="_blank">Download</a></td>
+<td><a href="https://multipass.run/" target="_blank">Download</a></td>
+</tr>
+<tr>
+<td><a href="https://stedolan.github.io/jq/" target="_blank">jq</a></td>
+<td><code>brew install jq</code></td>
+<td><a href="https://github.com/mikefarah/yq#linux-via-snap" target="_blank">Install</a></td>
+<td><code>choco install yq</code></td>
+</tr>
+<tr>
+<td><a href="https://kubectl.docs.kubernetes.io" target="_blank">kubectl</a></td>
+<td><code>brew install kubectl</code></td>
+<td><a href="https://kubectl.docs.kubernetes.io/installation/kubectl/binaries/" target="_blank">Download</a></td>
+<td><code>choco install kubernetes-cli</code></td>
+</tr>
+<tr>
+<td><a href="https://www.python.org/" target="_blank">Python3</a></td>
+<td><code>brew install kubectl</code></td>
+<td><a href="https://www.python.org/downloads/macos/" target="_blank">Download</a></td>
+<td><a href="https://www.python.org/downloads/windows/" target="_blank">Download</a></td>
+</tr>
+<tr>
+<td><a href="https://github.com/wercker/stern" target="_blank">stern(optional)</a></td>
+<td><code>brew install stern</code></td>
+<td><a href="https://github.com/wercker/stern/releases/download/1.11.0/stern_linux_amd64" target="_blank">Download</a></td>
+<td><a href="https://github.com/wercker/stern/releases/download/1.11.0/stern_windows_amd64.exe" target="_blank">Download</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="download-sources">Download Sources<a class="headerlink" href="#download-sources" title="Permanent link">&para;</a></h2>
+<div class="highlight"><pre><span></span><code>git clone https://github.com/kameshsampath/gloo-mesh-vm-demo
+<span class="nb">cd</span> gloo-mesh-vm-demo
+</code></pre></div>
+<p>For the rest of the instructions, the cloned sources folder will be referred to as <code>$DEMO_HOME</code>.</p>
+<h2 id="ensure-environment">Ensure Environment<a class="headerlink" href="#ensure-environment" title="Permanent link">&para;</a></h2>
+<p>Assuming you have downloaded <a href="https://direnv.net" target="_blank">direnv</a> and hooked it to your <a href="https://direnv.net/docs/hook.html" target="_blank">shell</a>.</p>
+<div class="highlight"><pre><span></span><code>direnv allow .
+</code></pre></div>
+<h2 id="setup-ansible-environment">Setup Ansible Environment<a class="headerlink" href="#setup-ansible-environment" title="Permanent link">&para;</a></h2>
+<p>The demo will be using <a href="https://docs.ansible.com/" target="_blank">Ansible</a> to setup the environment, run the following command to install Ansible modules and extra collections and roles the will be used for various tasks.</p>
+<div class="highlight"><pre><span></span><code>make setup-ansible
+</code></pre></div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The demo uses <a href="https://direnv.net" target="_blank">direnv</a> to create a local Python Virtual Environment.</p>
+</div>
+<h2 id="ansible-variables">Ansible Variables<a class="headerlink" href="#ansible-variables" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th align="left">Variable</th>
+<th align="left">Description</th>
+<th align="left">Default Value</th>
+<th align="left">Ansible Role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2 id="create-virtual-machines">Create Virtual Machines<a class="headerlink" href="#create-virtual-machines" title="Permanent link">&para;</a></h2>
+<p>For the demo we will be using <a href="https://multipass.run" target="_blank">multipass</a> to create and run virtual machines. Run the following command to create the virtual machines,</p>
+<div class="highlight"><pre><span></span><code>make create-vms
+</code></pre></div>
+<p>The previous command would have created three VMs namely,</p>
+<ul>
+<li><strong>mgmt</strong> - which will act as Gloo Management Kubernetes cluster.</li>
+<li><strong>cluster1</strong> - The Kubernetes cluster where Istio and its workloads will be deployed. The Virtual Machine workloads will use the  Istio Control Plane(<abbr title="Control Plane">CP</abbr>) opn this cluster for its services.</li>
+<li><strong>vm1</strong> - the Virtual Machine which will hold a small workload that will be connected to <strong>cluster1</strong>.</li>
+</ul>
+<p>You can always get the information about the multipass <abbr title="Virtual Machine">VM</abbr> using the command,</p>
+<div class="highlight"><pre><span></span><code>multipass info &lt;vm name&gt;
+<span class="c1"># e.g. </span>
+multipass info cluster1
+</code></pre></div>
+<p>That should give an information like,</p>
+<div class="highlight"><pre><span></span><code>Name:           cluster1
+State:          Running
+IPv4:           192.168.64.90
+                172.16.0.0
+Release:        Ubuntu 20.04.3 LTS
+Image hash:     8fbc4e8c6e33 (Ubuntu 20.04 LTS)
+Load:           2.37 1.88 1.76
+Disk usage:     5.3G out of 28.9G
+Memory usage:   1.8G out of 7.8G
+Mounts:         --
+</code></pre></div>
+<h2 id="setup-kubernetes-clusters">Setup Kubernetes Clusters<a class="headerlink" href="#setup-kubernetes-clusters" title="Permanent link">&para;</a></h2>
+<p>As part of this demo we will be setting up <a href="https://k3s.io">k3s</a> Kubernetes clusters. The k3s clusters will be a single node cluster run via multipass <abbr title="Virtual Machine">VM</abbr>. We will configure that to with the following flags,</p>
+<ul>
+<li><code>--cluster-cidr=172.16.0.0/24</code> allows us to create <strong>65 – 110</strong> Pods on this node</li>
+<li><code>--service-cidr=172.18.0.0/20</code> allows us to create <strong>4096</strong> services</li>
+<li><code>--disable=traefik</code> disable <code>traefik</code> deployment</li>
+</ul>
+<p>Check the GKE doc<sup id="fnref:1"><a class="footnote-ref" href="#fn:1">1</a></sup> for a reference on how to calculate the number of pods and service with given CIDR range.</p>
+<p>Run the following command to deploy the clusters to our <code>mgmt</code> and <code>cluster1</code> VMs.</p>
+<div class="highlight"><pre><span></span><code>make create-kubernetes-clusters
+</code></pre></div>
+<p>The previous step we should have two Kubernetes clusters <code>mgmt</code> and <code>cluster1</code> and as convenience it merges the two cluster <code>kubeconfig</code> into one as <code>$DEMO_HOME/work/.kube/config</code> which is set as the current shell <code>$KUBECONFIG</code> value. So doing <code>kubectl config get-contexts</code> now should return you two contexts.</p>
+<div class="highlight"><pre><span></span><code>CURRENT   NAME       CLUSTER    AUTHINFO   NAMESPACE
+          cluster1   cluster1   cluster1
+*         mgmt       mgmt       mgmt
+</code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The k3s deployment as part of this demo will be using <a href="https://projectcalico.docs.tigera.io" target="_blank">Calico</a> which enables us to define routes to the Kubernetes services/pods via its <a href="https://projectcalico.docs.tigera.io/networking/openstack/host-routes" target="_blank">host</a>.</p>
+</div>
+<h2 id="setup-gloo">Setup Gloo<a class="headerlink" href="#setup-gloo" title="Permanent link">&para;</a></h2>
+<p>Let us setup on the <code>mgmt</code> cluster. The setup uses the Gloo Enterprise License, if you don&rsquo;t have one please request 30 day trial one via <a href="https://solo.io" target="_blank">solo.io</a>. Set the License key via as <code>$GLOO_MESH_GATEWAY_LICENSE_KEY</code> environment variable.</p>
+<p>Run the following command to deploy Gloo Mesh,</p>
+<div class="highlight"><pre><span></span><code>make deploy-gloo
+</code></pre></div>
+<p>Ensure Gloo mesh is setup correctly,</p>
+<div class="highlight"><pre><span></span><code>meshctl check server
+</code></pre></div>
+<div class="highlight"><pre><span></span><code>Gloo Mesh Management Cluster Installation
+--------------------------------------------
+
+🟢 Gloo Mesh Pods Status
++----------+------------+-------------------------------+-----------------+
+| CLUSTER  | REGISTERED | DASHBOARDS AND AGENTS PULLING | AGENTS PUSHING  |
++----------+------------+-------------------------------+-----------------+
+| cluster1 | true       |                             2 |               1 |
++----------+------------+-------------------------------+-----------------+
+
+🟢 Gloo Mesh Agents Connectivity
+
+Management Configuration
+---------------------------
+
+🟢 Gloo Mesh CRD Versions
+
+🟢 Gloo Mesh Networking Configuration Resources
+</code></pre></div>
+<h2 id="setup-istio">Setup Istio<a class="headerlink" href="#setup-istio" title="Permanent link">&para;</a></h2>
+<p>Lets now complete the environment setup part by deploying <a href="https://istio.io">Istio</a> on to <code>cluster1</code>. We use Istio <code>1.11.5</code> for this tutorial,</p>
+<div class="highlight"><pre><span></span><code>make deploy-istio
+</code></pre></div>
+<p>Lets check if Istio setup is done correctly,</p>
+<div class="highlight"><pre><span></span><code>istioctl verify-install --context<span class="o">=</span><span class="nv">$CLUSTER1</span>
+</code></pre></div>
+<p>The command should show the following output ( trimmed for brevity),</p>
+<div class="highlight"><pre><span></span><code>...
+Checked 13 custom resource definitions
+Checked 1 Istio Deployments
+✔ Istio is installed and verified successfully
+</code></pre></div>
+<div class="footnote">
+<hr />
+<ol>
+<li id="fn:1">
+<p>https://cloud.google.com/kubernetes-engine/docs/concepts/alias-ips&#160;<a class="footnote-backref" href="#fnref:1" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+</li>
+</ol>
+</div>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href=".." class="md-footer__link md-footer__link--prev" aria-label="Previous: Overview" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Overview
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../deploy_apps_on_k8s/" class="md-footer__link md-footer__link--next" aria-label="Next: Deploy applications on Kubernetes" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Deploy applications on Kubernetes
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "..", "features": ["content.code.annotate", "content.tabs.link"], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../assets/javascripts/workers/search.22074ed6.min.js"}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.1514a9a0.min.js"></script>
+      
+    
+  </body>
+</html>
