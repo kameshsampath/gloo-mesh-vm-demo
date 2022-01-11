@@ -265,20 +265,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
-        Troubleshooting
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -286,18 +272,18 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" checked>
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_2">
+        <label class="md-nav__link" for="__nav_5_1">
           Ansible Roles
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Ansible Roles" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_2">
+        <label class="md-nav__title" for="__nav_5_1">
           <span class="md-nav__icon md-icon"></span>
           Ansible Roles
         </label>
@@ -380,27 +366,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#example-playbook" class="md-nav__link">
-    Example Playbook
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-helm-secrets-plugin" class="md-nav__link">
-    Using helm secrets plugin
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#create-age-key" class="md-nav__link">
-    Create age key
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -412,6 +377,20 @@
           
         </ul>
       </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
     </li>
   
 
@@ -461,27 +440,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#example-playbook" class="md-nav__link">
-    Example Playbook
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#using-helm-secrets-plugin" class="md-nav__link">
-    Using helm secrets plugin
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#create-age-key" class="md-nav__link">
-    Create age key
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -497,9 +455,11 @@
 
   <h1>Workload VM</h1>
 
-<p>This role helps in installing and configuring <a href="https://argo-cd.readthedocs.io/en/stable/">Argocd</a> the Kubernetes cluster.</p>
+<p>This role helps in installing and configuring the Istio sidecar <abbr title="Virtual Machine">VM</abbr> a.k.a Istio Workload <abbr title="Virtual Machine">VM</abbr>.</p>
 <h2 id="requirements">Requirements<a class="headerlink" href="#requirements" title="Permanent link">&para;</a></h2>
-<p>Access to Kubernetes cluster,</p>
+<ul>
+<li>Access to k3s Kubernetes cluster</li>
+</ul>
 <h2 id="variables">Variables<a class="headerlink" href="#variables" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
@@ -511,63 +471,72 @@
 </thead>
 <tbody>
 <tr>
-<td>kubernetes_spices_argocd_k8s_context</td>
-<td>The Kubernetes context where Argcod will be installed. The playbook will fail if this is not set.</td>
-<td></td>
+<td>workload_istio_ns</td>
+<td>The Istio Control Plane namespace</td>
+<td>istio-system</td>
 </tr>
 <tr>
-<td>kubernetes_spices_argocd_namespace</td>
-<td>The namespace to install Argocd</td>
-<td>argocd</td>
+<td>workload_istio_gateway_ns</td>
+<td>The Istio Gateways namespace</td>
+<td>istio-gateways</td>
 </tr>
 <tr>
-<td>kubernetes_spices_argocd_version</td>
-<td>The argocd version to be used</td>
-<td>2.1.6</td>
+<td>workload_istio_svc_name</td>
+<td>The Istio Ingress Gateway name</td>
+<td>ingressgateway</td>
 </tr>
 <tr>
-<td>kubernetes_spices_argocd_helm_secerts_plugin</td>
-<td>Use helm secrets plugin with argocd applications</td>
-<td>false</td>
+<td>force_app_install</td>
+<td>Clean install <abbr title="Virtual Machine">VM</abbr> workload application</td>
+<td>no</td>
+</tr>
+<tr>
+<td>use_nodeport</td>
+<td>Use nodeport to connect to Istiod</td>
+<td>no</td>
+</tr>
+<tr>
+<td>istio_enabled</td>
+<td>Install and configure Istio Sidecar in the <abbr title="Virtual Machine">VM</abbr></td>
+<td>yes</td>
+</tr>
+<tr>
+<td>istio_vm_app</td>
+<td>The name of the Istio <abbr title="Virtual Machine">VM</abbr> app</td>
+<td>istio_vm_app</td>
+</tr>
+<tr>
+<td>istio_vm_namespace</td>
+<td>The Kubernetes namespace to create Istio <abbr title="Virtual Machine">VM</abbr> Workload resources</td>
+<td>vm-demos-app</td>
+</tr>
+<tr>
+<td>istio_vm_workdir</td>
+<td>The directory to create Istio workload files</td>
+<td><code>/home/{{ ansible_user }}/istio-vm/files</code></td>
+</tr>
+<tr>
+<td>istio_vm_service_account</td>
+<td>The Kubernetes service account to use with Istio <abbr title="Virtual Machine">VM</abbr> Workload resources</td>
+<td>vm-service-account</td>
+</tr>
+<tr>
+<td>istio_cluster_network</td>
+<td>The Istio Control Plane cluster network</td>
+<td>network1</td>
+</tr>
+<tr>
+<td>istio_vm_network</td>
+<td>The Istio <abbr title="Virtual Machine">VM</abbr> network</td>
+<td>vm-network</td>
+</tr>
+<tr>
+<td>istio_cluster</td>
+<td>The Istio cluster context name</td>
+<td>cluster1</td>
 </tr>
 </tbody>
 </table>
-<h2 id="example-playbook">Example Playbook<a class="headerlink" href="#example-playbook" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>
-</code></pre></div>
-<div class="admonition important">
-<p class="admonition-title">Important</p>
-<ul>
-<li>Based on the above example the <code>kubernetes_spices_argocd_k8s_context</code> should be set to <code>mgmt</code>, the context which is created by minikube</li>
-<li>The default credentials to access argocd will be <code>admin/password</code></li>
-</ul>
-</div>
-<h2 id="using-helm-secrets-plugin">Using helm secrets plugin<a class="headerlink" href="#using-helm-secrets-plugin" title="Permanent link">&para;</a></h2>
-<p>To use helm secrets plugin with Argocd applications, enable the plugin configuration by adding enable the flag <code>kubernetes_spices_argocd_helm_secerts_plugin</code> to <code>true</code>.</p>
-<p>Lets take an example of <a href="https://github.com/mozilla/sops">sops</a> and <a href="https://github.com/FiloSottile/age">age</a>,</p>
-<h2 id="create-age-key">Create age key<a class="headerlink" href="#create-age-key" title="Permanent link">&para;</a></h2>
-<div class="highlight"><pre><span></span><code>age-keygen -o key.txt
-</code></pre></div>
-<p>Move the <code>key.txt</code> to secure place, preferably <code>$HOME/.ssh</code>. Assuming you moved it to <code>$HOME/.ssh</code>, lets set that as local environment variables for convinience:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">SOPS_AGE_KEY_FILE</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$HOME</span><span class="s2">/.ssh/key.txt&quot;</span>
-</code></pre></div>
-<p>Also note and export the <strong>publickey</strong> in the <code>$SOPS_AGE_KEY_FILE</code> as <code>$SOPS_AGE_RECIPIENTS</code></p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span> <span class="nv">SOPS_AGE_RECIPIENTS</span><span class="o">=</span><span class="k">$(</span>cat <span class="nv">$SOPS_AGE_KEY_FILE</span>  <span class="p">|</span> awk <span class="s1">&#39;NR==2{ print $4}&#39;</span><span class="k">)</span>
-</code></pre></div>
-<p>Ensure the sops configration <code>.sops.yml</code> is updated with your <em>age</em> publickey,</p>
-<div class="highlight"><pre><span></span><code>yq <span class="nb">eval</span> <span class="s1">&#39;.creation_rules[0].age |= strenv(SOPS_AGE_RECIPIENTS)&#39;</span> .sops.yml 
-</code></pre></div>
-<p>We need to make the age key to be available to the Argocd repo server so that it can decrypt the secrets,</p>
-<div class="highlight"><pre><span></span><code>kubectl create ns argocd
-</code></pre></div>
-<div class="highlight"><pre><span></span><code>kubectl create secret generic helm-secrets-private-keys <span class="se">\</span>
-  --namespace<span class="o">=</span>argocd <span class="se">\</span>
-  --from-file<span class="o">=</span>key.txt<span class="o">=</span><span class="s2">&quot;</span><span class="nv">$SOPS_AGE_KEY_FILE</span><span class="s2">&quot;</span>
-</code></pre></div>
-<p>Now you an use the same play to deploy Argocd with helm secrets enabled,</p>
-<div class="highlight"><pre><span></span><code>
-</code></pre></div>
-<p>You can check the <a href="https://github.com/kameshsampath/helm-secret-demo">example project</a> to deploy Keycloak using helm secrets plugin enabled with Argocd.</p>
 
               
             </article>
@@ -595,6 +564,21 @@
           </div>
         </a>
       
+      
+        
+        <a href="../troubleshooting/" class="md-footer__link md-footer__link--next" aria-label="Next: Troubleshooting" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Troubleshooting
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+          </div>
+        </a>
       
     </nav>
   

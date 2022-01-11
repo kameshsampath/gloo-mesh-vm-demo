@@ -354,36 +354,22 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../troubleshooting/" class="md-nav__link">
-        Troubleshooting
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
     
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2" type="checkbox" id="__nav_5_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_1" type="checkbox" id="__nav_5_1" >
       
       
       
       
-        <label class="md-nav__link" for="__nav_5_2">
+        <label class="md-nav__link" for="__nav_5_1">
           Ansible Roles
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Ansible Roles" data-md-level="2">
-        <label class="md-nav__title" for="__nav_5_2">
+        <label class="md-nav__title" for="__nav_5_1">
           <span class="md-nav__icon md-icon"></span>
           Ansible Roles
         </label>
@@ -433,6 +419,20 @@
           
         </ul>
       </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../troubleshooting/" class="md-nav__link">
+        Troubleshooting
+      </a>
     </li>
   
 
@@ -742,7 +742,7 @@
 </table>
 <p>Apart from the variables defined, there are three other variables that controls the setup,</p>
 <ul>
-<li><code>multipass_vms</code> - defines a dictionary of VMs that needs to be created,</li>
+<li><code>multipass_vms</code> - defines a dictionary of VMs that needs to be created.  For more details check the <a href="../role_multipass/">multipass role</a></li>
 </ul>
 <div class="highlight"><pre><span></span><code><span class="nt">multipass_vms</span><span class="p">:</span><span class="w"></span>
 <span class="w"> </span><span class="c1"># the name of the VM</span><span class="w"></span>
@@ -882,9 +882,13 @@ Management Configuration
 🟢 Gloo Mesh Networking Configuration Resources
 </code></pre></div>
 <h2 id="setup-istio">Setup Istio<a class="headerlink" href="#setup-istio" title="Permanent link">&para;</a></h2>
-<p>Lets now complete the environment setup part by deploying <a href="https://istio.io">Istio</a> on to <code>cluster1</code>. We use Istio <code>1.11.5</code> for this tutorial,</p>
+<p>Lets now complete the environment setup part by deploying <a href="https://istio.io">Istio</a> on to <code>cluster1</code>. We use Istio <code>1.11.5</code> for this tutorial but any version greater than <code>1.11.x</code> should work.</p>
 <div class="highlight"><pre><span></span><code>make deploy-istio
 </code></pre></div>
+<div class="admonition important">
+<p class="admonition-title">Important</p>
+<p>The Istio setup for this demo uses revisioned Control Plane deployment.</p>
+</div>
 <p>Lets check if Istio setup is done correctly,</p>
 <div class="highlight"><pre><span></span><code>istioctl verify-install --context<span class="o">=</span><span class="nv">$CLUSTER1</span>
 </code></pre></div>
