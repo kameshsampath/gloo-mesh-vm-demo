@@ -33,7 +33,7 @@ create-vms: ensure-env
 	ansible-playbook vms.yml $(EXTRA_ARGS)
 	$(MAKE) ensure-env
 
-.PHONY:	create-kube-clusters
+.PHONY:	create-kubernetes-clusters
 create-kube-clusters: ensure-env
 	ansible-playbook k3s.yml $(EXTRA_ARGS)
 	$(MAKE) ensure-env
