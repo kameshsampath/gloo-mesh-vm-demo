@@ -31,9 +31,27 @@ cd gloo-mesh-vm-demo
 direnv allow .
 ```
 
+The [Makefile](./Makefile) in the `$PROJECT_HOME` helps to perform the various setup tasks,
+
+```shell
+make help
+```
+
+```text
+help:                        print this help message
+setup-ansible:               setup ansible environment
+clean-up:                    cleans the setup and environment
+create-vms:                  create the multipass vms
+create-kubernetes-clusters:   Installs k3s on the multipass vms
+deploy-base:                  Prepare the vm with required packages and tools
+deploy-istio:                 Deploy Istio on to workload cluster
+deploy-gloo:                  Deploy Gloo Mesh on to management and workload clusters
+deploy-workload:              Deploy workload recommendation service on vm
+```
+
 ## Setup Ansible Environment
 
-The demo will be using [Ansible](https://docs.ansible.com/){target=_blank} to setup the environment, run the following command to install Ansible modules and extra collections and roles the will be used by various tasks.
+The demo will be using [Ansible](https://docs.ansible.com/) to setup the environment, run the following command to install Ansible modules and extra collections and roles the will be used by various tasks.
 
 ```shell
 make setup-ansible
@@ -85,7 +103,7 @@ helm repo update
 ```
 
 ```shell
-kubectl label ns default istio.io/rev=1-11-5
+kubectl --context="$CLUSTER1" label ns default istio.io/rev=1-11-5
 ```
 
 Deploy Customer,
@@ -100,7 +118,7 @@ Deploy Preference,
 
 ```shell
 helm install --kube-context="$CLUSTER1" \
-  customer istio-demo-apps/preference 
+  preference istio-demo-apps/preference 
 ```
 
 Call the service to test,
@@ -136,22 +154,48 @@ make deploy-workload
 
 ## Calling Services
 
-### From VM to Kubernetes
+### From Kubernetes to VM
 
 ```shell
-multipass exec vm1 -- curl customer.default.svc.cluster.local:8080
+curl $SVC_URL
 ```
 
 The command should shown an output like,
 
 ```text
-customer => preference => recommendation v1 from 'vm1': 1
+customer => preference => recommendation v1 from 'vm1': 2
 ```
 
-### From Kubernetes to VM
+### From VM to Kubernetes
+
+Shell into the `vm1`,
 
 ```shell
-curl $SVC_URL
+multipass exec vm1 bash
+```
+
+```shell
+curl --connect-timeout 3 customer.default.svc.cluster.local:8080
+```
+
+You might not get a response to the command and when checking the sidecar logs on the `vm1` you should see something like:
+
+```text
+[2022-02-09T13:34:21.473Z] "GET / HTTP/1.1" 503 UF,URX upstream_reset_before_response_started{connection_failure} - "-" 0 91 24255 - "-" "curl/7.68.0" "5ab981ed-c95f-4730-8732-2fe6fd7f6208" "customer.default.svc.cluster.local:8080" "172.16.0.15:8080" outbound|8080||customer.default.svc.cluster.local - 172.18.2.58:8080 192.168.205.6:34832 - default
+```
+
+Let's fix it by adding routes to our pods and services,
+
+```shell
+export CLUSTER1_IP=$(kubectl get nodes -owide --no-headers  | awk 'NR==1{print $6}')
+sudo ip route add 172.16.0.0/28 via $CLUSTER1_IP
+sudo ip route add 172.18.0.0/20 via $CLUSTER1_IP
+```
+
+Now running the following command from the `vm1`,
+
+```shell
+curl --connect-timeout 3 customer.default.svc.cluster.local:8080
 ```
 
 The command should shown an output like,
